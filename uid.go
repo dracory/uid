@@ -20,10 +20,13 @@ import (
 // - A 32-character uppercase numeric string suitable for human-readable IDs
 func HumanUid() string {
 	time.Sleep(1 * time.Nanosecond)
+
 	r, _ := rand.Prime(rand.Reader, 64)
+
 	id := time.Now().UTC().Format("20060102150405.0000000")
 	id = strings.ReplaceAll(id, ".", "")
 	id += r.String()
+
 	return id[0:32]
 }
 
@@ -40,10 +43,13 @@ func HumanUid() string {
 // - A 23-character numeric string
 func NanoUid() string {
 	time.Sleep(time.Nanosecond) // as its a nanoseconds based ID we need at least a nanosecond between the generations to avoid collisions
+
 	r, _ := rand.Prime(rand.Reader, 64)
+
 	id := time.Now().UTC().Format("20060102150405.0000000")
 	id = strings.ReplaceAll(id, ".", "")
 	id += r.String()
+
 	return id[0:23]
 }
 
@@ -60,10 +66,13 @@ func NanoUid() string {
 // - A 20-character numeric string
 func MicroUid() string {
 	time.Sleep(time.Microsecond) // as its a microseconds based ID we need at least a microsecond between the generations to avoid collisions
+
 	r, _ := rand.Prime(rand.Reader, 64)
+
 	id := time.Now().UTC().Format("20060102150405.0000000")
 	id = strings.ReplaceAll(id, ".", "")
 	id += r.String()
+
 	return id[0:20]
 }
 
@@ -80,10 +89,13 @@ func MicroUid() string {
 // - A 14-character numeric string representing UTC date/time to the second
 func SecUid() string {
 	time.Sleep(time.Second) // as its a seconds based ID we need at least a second between the generations to avoid collisions
+
 	r, _ := rand.Prime(rand.Reader, 64)
+
 	id := time.Now().UTC().Format("20060102150405.0000000")
 	id = strings.ReplaceAll(id, ".", "")
 	id += r.String()
+
 	return id[0:14]
 }
 
@@ -113,7 +125,9 @@ func Timestamp() string {
 // - Unix timestamp in microseconds (base-10 string)
 func TimestampMicro() string {
 	time.Sleep(time.Microsecond) // as its a microseconds based ID we need at least a microsecond between the generations to avoid collisions
+
 	now := time.Now().UTC().UnixMicro()
+
 	return strconv.FormatInt(now, 10)
 }
 
@@ -128,6 +142,8 @@ func TimestampMicro() string {
 // - Unix timestamp in nanoseconds (base-10 string)
 func TimestampNano() string {
 	time.Sleep(time.Nanosecond) // as its a nanoseconds based ID we need at least a nanosecond between the generations to avoid collisions
+
 	now := time.Now().UTC().UnixNano()
+
 	return strconv.FormatInt(now, 10)
 }
