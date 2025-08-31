@@ -1,4 +1,4 @@
-module github.com/gouniverse/uid
+module github.com/dracory/uid
 
 go 1.21
 
