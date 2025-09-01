@@ -4,6 +4,22 @@ import (
 	"testing"
 )
 
+// helper to assert expected length and hyphen positions
+func assertHyphenPositions(t *testing.T, s string, wantLen int, positions []int) {
+	t.Helper()
+	if len(s) != wantLen {
+		t.Fatalf("length = %d, want %d; value=%s", len(s), wantLen, s)
+	}
+	for _, i := range positions {
+		if i < 0 || i >= len(s) {
+			t.Fatalf("hyphen index %d out of range for %q", i, s)
+		}
+		if s[i] != '-' {
+			t.Fatalf("expected hyphen at index %d, got %q; value=%s", i, s[i], s)
+		}
+	}
+}
+
 func TestHumanUid(t *testing.T) {
 	humanUid := HumanUid()
 	humanUid2 := HumanUid()
@@ -23,6 +39,15 @@ func TestHumanUid(t *testing.T) {
 	if humanUid > humanUid2 {
 		t.Fatal("Human UID 1 must be smaller than Human UID 2")
 	}
+}
+
+func TestHumanUidFormatted(t *testing.T) {
+	hf := HumanUid(true)
+	if hf == "" {
+		t.Fatal("Human UID (formatted) must not be null")
+	}
+	// formatted variant: groups 8-4-4-16 => hyphens at 8,13,18; total length 35
+	assertHyphenPositions(t, hf, 35, []int{8, 13, 18})
 }
 
 func TestMicroUid(t *testing.T) {
@@ -46,6 +71,15 @@ func TestMicroUid(t *testing.T) {
 	}
 }
 
+func TestMicroUidFormatted(t *testing.T) {
+	mf := MicroUid(true)
+	if mf == "" {
+		t.Fatal("Micro UID (formatted) must not be null")
+	}
+	// formatted variant: groups 8-6-6 => hyphens at 8,15; total length 22
+	assertHyphenPositions(t, mf, 22, []int{8, 15})
+}
+
 func TestNanoUid(t *testing.T) {
 	nanoUid := NanoUid()
 	nanoUid2 := NanoUid()
@@ -65,6 +99,15 @@ func TestNanoUid(t *testing.T) {
 	if nanoUid > nanoUid2 {
 		t.Fatal("Nano UID 1 must be smaller than Nano UID 2")
 	}
+}
+
+func TestNanoUidFormatted(t *testing.T) {
+	nf := NanoUid(true)
+	if nf == "" {
+		t.Fatal("Nano UID (formatted) must not be null")
+	}
+	// formatted variant: groups 8-6-6-3 => hyphens at 8,15,22; total length 26
+	assertHyphenPositions(t, nf, 26, []int{8, 15, 22})
 }
 
 func TestSecUid(t *testing.T) {
@@ -87,6 +130,15 @@ func TestSecUid(t *testing.T) {
 	if secUid > secUid2 {
 		t.Fatal("Sec UID 1 must be smaller than sec UID 2")
 	}
+}
+
+func TestSecUidFormatted(t *testing.T) {
+	sf := SecUid(true)
+	if sf == "" {
+		t.Fatal("Sec UID (formatted) must not be null")
+	}
+	// formatted variant: groups 8-6 => hyphen at 8; total length 15
+	assertHyphenPositions(t, sf, 15, []int{8})
 }
 
 func TestTimestamp(t *testing.T) {

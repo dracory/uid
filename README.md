@@ -61,9 +61,9 @@ The type you want to use will usually depends on two considerations:
 1. How random you want it to be? The longer the identifier, the more the chances of collision reduce
 2. How long you want the identifier to be? The longer the identifier, reduces the readability, as well as the storage space to store it.
 
-For most of the user cases a Micro UUID (20 chars) should be fine. A human UUID (32 chars) should be avoided where a human is involved as too "mind bogging" to work with.
+For most of the user cases a Micro UID (20 chars) should be fine. A human UID (32 chars) should be avoided where a human is involved as too "mind bogging" to work with.
 
-1. Human UUID (32 digits)
+1. Human UID (32 digits)
 
     Format: YYYYMMDD-HHMM-SSMM-MMMMNNNRRRRRRRRR
 
