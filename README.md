@@ -25,30 +25,45 @@ import (
 func main() {
     // HumanUid generates a UID (32 digits)
     // Format: YYYYMMDD-HHMM-SSMM-MMMMNNNRRRRRRRRR
-    human := uid.HumanUid()      // length: 32
+    human := uid.HumanUid()          // unformatted, length: 32
+    humanF := uid.HumanUid(true)     // formatted (8-4-4-16), length: 35
 
     // NanoUid generates a UID (23 digits)
     // Format: YYYYMMDD-HHMMSS-MMMMMM-NNN
-    nano := uid.NanoUid()        // length: 23
+    nano := uid.NanoUid()            // unformatted, length: 23
+    nanoF := uid.NanoUid(true)       // formatted (8-6-6-3), length: 26
 
     // MicroUid generates a UID (20 digits)
     // Format: YYYYMMDD-HHMMSS-MMMMMM
-    micro := uid.MicroUid()      // length: 20
+    micro := uid.MicroUid()          // unformatted, length: 20
+    microF := uid.MicroUid(true)     // formatted (8-6-6), length: 22
 
     // SecUid generates a UID (14 digits)
     // Format: YYYYMMDD-HHMMSS
-    sec := uid.SecUid()          // length: 14
+    sec := uid.SecUid()              // unformatted, length: 14
+    secF := uid.SecUid(true)         // formatted (8-6), length: 15
 
     // Unix timestamps as strings
-    ts := uid.Timestamp()        // seconds, length: 10
-    tsu := uid.TimestampMicro()  // microseconds, length: 16
-    tsn := uid.TimestampNano()   // nanoseconds, length: 19
+    ts := uid.Timestamp()            // seconds, length: 10
+    tsu := uid.TimestampMicro()      // microseconds, length: 16
+    tsn := uid.TimestampNano()       // nanoseconds, length: 19
 
-    // UUIDs (via github.com/google/uuid)
-    u := uid.Uuid()              // v4 without hyphens, length: 32
-    uf := uid.UuidFormatted()    // v4 with hyphens, length: 36
+    // UUIDs (implemented via standard library)
+    u4 := uid.Uuid()                 // v4 unformatted, length: 32
+    u4f := uid.Uuid(true)            // v4 formatted, length: 36
+    v1 := uid.UuidV1()               // v1 unformatted, length: 32
+    v1f := uid.UuidV1(true)          // v1 formatted, length: 36
+    v3, _ := uid.UuidV3("1234567890abcdef", []byte("name"))     // v3 unformatted
+    v3f, _ := uid.UuidV3("1234567890abcdef", []byte("name"), true)
+    v5, _ := uid.UuidV5("1234567890abcdef", []byte("name"))     // v5 unformatted
+    v5f, _ := uid.UuidV5("1234567890abcdef", []byte("name"), true)
+    v6 := uid.UuidV6()               // v6 unformatted, length: 32
+    v6f := uid.UuidV6(true)          // v6 formatted, length: 36
+    v7 := uid.UuidV7()               // v7 unformatted, length: 32
+    v7f := uid.UuidV7(true)          // v7 formatted, length: 36
 
-    fmt.Println(human, nano, micro, sec, ts, tsu, tsn, u, uf)
+    fmt.Println(human, humanF, nano, nanoF, micro, microF, sec, secF,
+        ts, tsu, tsn, u4, u4f, v1, v1f, v3, v3f, v5, v5f, v6, v6f, v7, v7f)
 }
 ```
 
@@ -132,33 +147,32 @@ For most of the user cases a Micro UID (20 chars) should be fine. A human UID (3
 
 ## UUID functions
 
-All UUID functions are thin wrappers around github.com/google/uuid.
+UUIDs are implemented using only the Go standard library (no external deps).
 
-- Uuid() → v4 without hyphens
-  Example: 550e8400e29b41d4a716446655440000 (length: 32)
-
-- UuidFormatted() → v4 with hyphens
-  Example: 550e8400-e29b-41d4-a716-446655440000 (length: 36)
-
-- UuidV1() / UuidV1Formatted() → version 1 (time-based)
-  Examples: 6ba7b8109dad11d180b400c04fd430c8 (32) • 6ba7b810-9dad-11d1-80b4-00c04fd430c8 (36)
-
-- UuidV3(namespace, data) / UuidV3Formatted(namespace, data) → version 3 (MD5 name-based)
-  Examples: 3d813cbb47fb32ba91df831e1593ac29 (32) • 3d813cbb-47fb-32ba-91df-831e1593ac29 (36)
-
-- UuidV4() / UuidV4Formatted() → version 4 (random)
+- Uuid(formatted ...bool) → version 4 (random)
   Examples: 550e8400e29b41d4a716446655440000 (32) • 550e8400-e29b-41d4-a716-446655440000 (36)
 
-- UuidV5(namespace, data) / UuidV5Formatted(namespace, data) → version 5 (SHA-1 name-based)
+- UuidV1(formatted ...bool) → version 1 (time-based)
+  Examples: 6ba7b8109dad11d180b400c04fd430c8 (32) • 6ba7b810-9dad-11d1-80b4-00c04fd430c8 (36)
+
+- UuidV3(namespace string, data []byte, formatted ...bool) → version 3 (MD5 name-based)
+  Examples: 3d813cbb47fb32ba91df831e1593ac29 (32) • 3d813cbb-47fb-32ba-91df-831e1593ac29 (36)
+
+- UuidV4(formatted ...bool) → version 4 (random)
+  Examples: 550e8400e29b41d4a716446655440000 (32) • 550e8400-e29b-41d4-a716-446655440000 (36)
+
+- UuidV5(namespace string, data []byte, formatted ...bool) → version 5 (SHA-1 name-based)
   Examples: 21f7f8de80515b8986800195ef798b6a (32) • 21f7f8de-8051-5b89-8680-0195ef798b6a (36)
 
-- UuidV6() / UuidV6Formatted() → version 6 (time-ordered)
+- UuidV6(formatted ...bool) → version 6 (time-ordered)
   Examples: 1ed0c9e48f7b6b2c9c3b6a6c7a9d5e12 (32) • 1ed0c9e4-8f7b-6b2c-9c3b-6a6c7a9d5e12 (36)
 
-- UuidV7() / UuidV7Formatted() → version 7 (Unix time-based)
+- UuidV7(formatted ...bool) → version 7 (Unix time-based)
   Examples: 01890f5f3d9c7a0e8a7b6c5d4e3f2a10 (32) • 01890f5f-3d9c-7a0e-8a7b-6c5d4e3f2a10 (36)
 
 ## Change Log
+2025.09.01 - Add optional hyphen formatting
+2025.08.31 - Move UUID functions/tests into separate files
 2024.01.06 - Added Timestamp and Uuid functions
 2021.12.19 - Master branch changed to main
 2021.12.19 - Added tests
