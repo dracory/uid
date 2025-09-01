@@ -47,8 +47,8 @@ func TestUuidV1(t *testing.T) {
 }
 
 func TestUuidV1Formatted(t *testing.T) {
-    a := UuidV1Formatted()
-    b := UuidV1Formatted()
+    a := UuidV1(true)
+    b := UuidV1(true)
     if a == "" || b == "" {
         t.Fatal("UuidV1Formatted must not be empty")
     }
@@ -69,7 +69,7 @@ func TestUuidV3(t *testing.T) {
 
 func TestUuidV3Formatted(t *testing.T) {
     ns := string([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16})
-    got, err := UuidV3Formatted(ns, []byte("name"))
+    got, err := UuidV3(ns, []byte("name"), true)
     if err != nil {
         t.Fatalf("UuidV3Formatted error: %v", err)
     }
@@ -97,8 +97,8 @@ func TestUuidV4_Explicit(t *testing.T) {
 }
 
 func TestUuidV4Formatted_Explicit(t *testing.T) {
-    a := UuidV4Formatted()
-    b := UuidV4Formatted()
+    a := UuidV4(true)
+    b := UuidV4(true)
     if a == "" || b == "" {
         t.Fatal("UuidV4Formatted must not be empty")
     }
@@ -119,7 +119,7 @@ func TestUuidV5(t *testing.T) {
 
 func TestUuidV5Formatted(t *testing.T) {
     ns := string([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16})
-    got, err := UuidV5Formatted(ns, []byte("name"))
+    got, err := UuidV5(ns, []byte("name"), true)
     if err != nil {
         t.Fatalf("UuidV5Formatted error: %v", err)
     }
@@ -146,8 +146,8 @@ func TestUuidV6(t *testing.T) {
 }
 
 func TestUuidV6Formatted(t *testing.T) {
-    a := UuidV6Formatted()
-    b := UuidV6Formatted()
+    a := UuidV6(true)
+    b := UuidV6(true)
     if a == "" || b == "" {
         t.Fatal("UuidV6Formatted must not be empty")
     }
@@ -170,8 +170,8 @@ func TestUuidV7(t *testing.T) {
 }
 
 func TestUuidV7Formatted(t *testing.T) {
-    a := UuidV7Formatted()
-    b := UuidV7Formatted()
+    a := UuidV7(true)
+    b := UuidV7(true)
     if a == "" || b == "" {
         t.Fatal("UuidV7Formatted must not be empty")
     }
@@ -182,18 +182,18 @@ func TestUuidV7Formatted(t *testing.T) {
 }
 
 func TestUuidFormatted(t *testing.T) {
-	uuid1 := UuidFormatted()
-	uuid2 := UuidFormatted()
+    uuid1 := Uuid(true)
+    uuid2 := Uuid(true)
 
-	if uuid1 == "" {
-		t.Fatal("Uuid must not be null")
-	}
+    if uuid1 == "" {
+        t.Fatal("Uuid must not be null")
+    }
 
-	if len(uuid1) != 36 {
-		t.Fatal("Uuid length must be 36 characters, found: ", len(uuid1))
-	}
+    if len(uuid1) != 36 {
+        t.Fatal("Uuid length must be 36 characters, found: ", len(uuid1))
+    }
 
-	if uuid1 == uuid2 {
-		t.Fatal("Uuid 1 and Timestamp 2 must not be the same")
-	}
+    if uuid1 == uuid2 {
+        t.Fatal("Uuid 1 and Timestamp 2 must not be the same")
+    }
 }
