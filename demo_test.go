@@ -34,6 +34,11 @@ func printTable(name string, original string) string {
 	return buf.String()
 }
 
+func TestSecUid(t *testing.T) {
+	secUid := uid.SecUid()
+	t.Log("\n" + printTable("SecUid", secUid))
+}
+
 func TestMicroUid(t *testing.T) {
 	microUid := uid.MicroUid()
 	t.Log("\n" + printTable("MicroUid", microUid))
@@ -57,6 +62,11 @@ func TestMicroUid(t *testing.T) {
 	}
 }
 
+func TestNanoUid(t *testing.T) {
+	nanoUid := uid.NanoUid()
+	t.Log("\n" + printTable("NanoUid", nanoUid))
+}
+
 func TestUidShorten(t *testing.T) {
 	humanUid := uid.HumanUid()
 	t.Log("\n" + printTable("HumanUid", humanUid))
@@ -78,4 +88,19 @@ func TestUidShorten(t *testing.T) {
 	if res, _ := uid.UnshortenBase64(s64); res != humanUid {
 		t.Error("UnshortenBase64 failed")
 	}
+}
+
+func TestTimestamp(t *testing.T) {
+	ts := uid.Timestamp()
+	t.Log("\n" + printTable("Timestamp", ts))
+}
+
+func TestTimestampMicro(t *testing.T) {
+	tsu := uid.TimestampMicro()
+	t.Log("\n" + printTable("TimestampMicro", tsu))
+}
+
+func TestTimestampNano(t *testing.T) {
+	tsn := uid.TimestampNano()
+	t.Log("\n" + printTable("TimestampNano", tsn))
 }
