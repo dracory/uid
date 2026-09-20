@@ -339,7 +339,7 @@ Using a sample `TimestampNano` (nanoseconds) as input:
 
 ## Change Log
 
-2026.08.20 - Added GenerateShortID()
+2026.09.20 - Added GenerateShortID()
 
 2026.01.16 - Add ID shortening and unshortening (Base16,32,36,58,62,64,Crockford,ZBase32)
 
