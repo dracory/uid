@@ -12,6 +12,27 @@ This package generates unique identifying strings. Largest attention is paid on 
 go get -u github.com/dracory/uid
 ```
 
+## Quick Reference / Overview Table
+
+Below is a complete comparison of all ID generators available in this package, showing example outputs and character counts (length):
+
+| Generator Function | Description / Format | Length (Unformatted) | Length (Formatted) | Example Output |
+| :--- | :--- | :---: | :---: | :--- |
+| `GenerateShortID()` | Crockford Base32 (ts + 4-bit counter) | **11** | N/A | `sa4rc789wxg` |
+| `HumanUid()` | Dated digits (YYYYMMDD-HHMM-SSMM-MMMMNNNRRRRRRRRR) | **32** | **35** | `20250831151133000012345678901234` |
+| `NanoUid()` | Dated digits (YYYYMMDD-HHMMSS-MMMMMM-NNN) | **23** | **26** | `20250831151133000012345` |
+| `MicroUid()` | Dated digits (YYYYMMDD-HHMMSS-MMMMMM) | **20** | **22** | `20250831151133000012` |
+| `SecUid()` | Dated digits (YYYYMMDD-HHMMSS) | **14** | **15** | `20250831151133` |
+| `Timestamp()` | Unix timestamp (seconds) | **10** | N/A | `1704524414` |
+| `TimestampMicro()`| Unix timestamp (microseconds) | **16** | N/A | `1704524414548721` |
+| `TimestampNano()` | Unix timestamp (nanoseconds) | **19** | N/A | `1704524414548721308` |
+| `Uuid()` / `UuidV4()` | Standard UUID v4 (random) | **32** | **36** | `459e2999bd071151a23d643da42c2cc2` |
+| `UuidV1()` | Standard UUID v1 (time-based) | **32** | **36** | `6ba7b8109dad11d180b400c04fd430c8` |
+| `UuidV3(...)` | Standard UUID v3 (MD5 name-based) | **32** | **36** | `3d813cbb47fb32ba91df831e1593ac29` |
+| `UuidV5(...)` | Standard UUID v5 (SHA-1 name-based) | **32** | **36** | `21f7f8de80515b8986800195ef798b6a` |
+| `UuidV6()` | Standard UUID v6 (time-ordered) | **32** | **36** | `1ed0c9e48f7b6b2c9c3b6a6c7a9d5e12` |
+| `UuidV7()` | Standard UUID v7 (Unix time-based) | **32** | **36** | `01890f5f3d9c7a0e8a7b6c5d4e3f2a10` |
+
 ## Usage
 
 ```go
@@ -23,6 +44,10 @@ import (
 )
 
 func main() {
+    // GenerateShortID generates a 11-character Crockford Base32 short ID
+    // Format: microsecond timestamp (int64) + 4-bit rolling counter
+    shortID := uid.GenerateShortID() // length: 11, e.g. "sa4rc789wxg"
+
     // HumanUid generates a UID (32 digits)
     // Format: YYYYMMDD-HHMM-SSMM-MMMMNNNRRRRRRRRR
     human := uid.HumanUid()          // unformatted, length: 32
@@ -62,7 +87,7 @@ func main() {
     v7 := uid.UuidV7()               // v7 unformatted, length: 32
     v7f := uid.UuidV7(true)          // v7 formatted, length: 36
 
-    fmt.Println(human, humanF, nano, nanoF, micro, microF, sec, secF,
+    fmt.Println(shortID, human, humanF, nano, nanoF, micro, microF, sec, secF,
         ts, tsu, tsn, u4, u4f, v1, v1f, v3, v3f, v5, v5f, v6, v6f, v7, v7f)
 
     // ID Shortening
@@ -82,6 +107,16 @@ The type you want to use will usually depends on two considerations:
 2. How long you want the identifier to be? The longer the identifier, reduces the readability, as well as the storage space to store it.
 
 For most of the user cases a Micro UID (20 chars) should be fine. A human UID (32 chars) should be avoided where a human is involved as too "mind bogging" to work with.
+
+0. Short ID (11 characters)
+
+    Format: Crockford Base32 encoded microsecond Unix timestamp + 4-bit rolling counter
+
+    `GenerateShortID()` is the fastest and shortest ID option since it avoids `time.Sleep` and random prime generation entirely.
+
+    Examples:
+
+    `sa4rc789wxg`
 
 1. Human UID (32 digits)
 
