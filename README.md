@@ -23,6 +23,10 @@ import (
 )
 
 func main() {
+    // GenerateShortID generates a 11-character Crockford Base32 short ID
+    // Format: microsecond timestamp (int64) + 4-bit rolling counter
+    shortID := uid.GenerateShortID() // length: 11, e.g. "sa4rc789wxg"
+
     // HumanUid generates a UID (32 digits)
     // Format: YYYYMMDD-HHMM-SSMM-MMMMNNNRRRRRRRRR
     human := uid.HumanUid()          // unformatted, length: 32
@@ -62,7 +66,7 @@ func main() {
     v7 := uid.UuidV7()               // v7 unformatted, length: 32
     v7f := uid.UuidV7(true)          // v7 formatted, length: 36
 
-    fmt.Println(human, humanF, nano, nanoF, micro, microF, sec, secF,
+    fmt.Println(shortID, human, humanF, nano, nanoF, micro, microF, sec, secF,
         ts, tsu, tsn, u4, u4f, v1, v1f, v3, v3f, v5, v5f, v6, v6f, v7, v7f)
 
     // ID Shortening
@@ -82,6 +86,16 @@ The type you want to use will usually depends on two considerations:
 2. How long you want the identifier to be? The longer the identifier, reduces the readability, as well as the storage space to store it.
 
 For most of the user cases a Micro UID (20 chars) should be fine. A human UID (32 chars) should be avoided where a human is involved as too "mind bogging" to work with.
+
+0. Short ID (11 characters)
+
+    Format: Crockford Base32 encoded microsecond Unix timestamp + 4-bit rolling counter
+
+    `GenerateShortID()` is the fastest and shortest ID option since it avoids `time.Sleep` and random prime generation entirely.
+
+    Examples:
+
+    `sa4rc789wxg`
 
 1. Human UID (32 digits)
 
