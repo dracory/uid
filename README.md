@@ -12,6 +12,27 @@ This package generates unique identifying strings. Largest attention is paid on 
 go get -u github.com/dracory/uid
 ```
 
+## Quick Reference / Overview Table
+
+Below is a complete comparison of all ID generators available in this package, showing example outputs and character counts (length):
+
+| Generator Function | Description / Format | Length (Unformatted) | Length (Formatted) | Example Output |
+| :--- | :--- | :---: | :---: | :--- |
+| `GenerateShortID()` | Crockford Base32 (ts + 4-bit counter) | **11** | N/A | `sa4rc789wxg` |
+| `HumanUid()` | Dated digits (YYYYMMDD-HHMM-SSMM-MMMMNNNRRRRRRRRR) | **32** | **35** | `20250831151133000012345678901234` |
+| `NanoUid()` | Dated digits (YYYYMMDD-HHMMSS-MMMMMM-NNN) | **23** | **26** | `20250831151133000012345` |
+| `MicroUid()` | Dated digits (YYYYMMDD-HHMMSS-MMMMMM) | **20** | **22** | `20250831151133000012` |
+| `SecUid()` | Dated digits (YYYYMMDD-HHMMSS) | **14** | **15** | `20250831151133` |
+| `Timestamp()` | Unix timestamp (seconds) | **10** | N/A | `1704524414` |
+| `TimestampMicro()`| Unix timestamp (microseconds) | **16** | N/A | `1704524414548721` |
+| `TimestampNano()` | Unix timestamp (nanoseconds) | **19** | N/A | `1704524414548721308` |
+| `Uuid()` / `UuidV4()` | Standard UUID v4 (random) | **32** | **36** | `459e2999bd071151a23d643da42c2cc2` |
+| `UuidV1()` | Standard UUID v1 (time-based) | **32** | **36** | `6ba7b8109dad11d180b400c04fd430c8` |
+| `UuidV3(...)` | Standard UUID v3 (MD5 name-based) | **32** | **36** | `3d813cbb47fb32ba91df831e1593ac29` |
+| `UuidV5(...)` | Standard UUID v5 (SHA-1 name-based) | **32** | **36** | `21f7f8de80515b8986800195ef798b6a` |
+| `UuidV6()` | Standard UUID v6 (time-ordered) | **32** | **36** | `1ed0c9e48f7b6b2c9c3b6a6c7a9d5e12` |
+| `UuidV7()` | Standard UUID v7 (Unix time-based) | **32** | **36** | `01890f5f3d9c7a0e8a7b6c5d4e3f2a10` |
+
 ## Usage
 
 ```go
