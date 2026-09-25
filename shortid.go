@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// Package-level state for GenerateShortID. Guarded by shortIDMutex to keep
+// Package-level state for ShortID. Guarded by shortIDMutex to keep
 // ID generation collision-free under concurrent use.
 var (
 	shortIDMutex     sync.Mutex
@@ -14,7 +14,7 @@ var (
 	shortIDCounter   int64
 )
 
-// GenerateShortID creates a new 11-character lowercase short ID.
+// ShortID creates a new 11-character lowercase short ID.
 // It encodes the current microsecond timestamp in Crockford Base32.
 // Thread-safe via mutex to prevent duplicate IDs under concurrency.
 //
@@ -41,8 +41,8 @@ var (
 //   - An 11-character lowercase string (e.g. "sa4rc789wxg").
 //
 // Example:
-//   - id := uid.GenerateShortID() // "sa4rc789wxg"
-func GenerateShortID() string {
+//   - id := uid.ShortID() // "sa4rc789wxg"
+func ShortID() string {
 	shortIDMutex.Lock()
 	defer shortIDMutex.Unlock()
 
@@ -71,7 +71,7 @@ func GenerateShortID() string {
 //
 // Design Decision (Option a):
 // This intentionally does NOT go through the shared encodeBase/math-big path
-// in shorten.go: GenerateShortID is meant to be called frequently and its
+// in shorten.go: ShortID is meant to be called frequently and its
 // input is always a fixed-size int64 (timestamp+counter composite), never an
 // arbitrary-precision number. Using big.Int here would add unnecessary
 // allocation and conversion overhead for a value that always fits in a
@@ -112,7 +112,7 @@ func NormalizeID(id string) string {
 //   - id: the ID string to check.
 //
 // Returns:
-//   - true if the length matches a short ID produced by GenerateShortID (11 characters);
+//   - true if the length matches a short ID produced by ShortID (11 characters);
 //     false otherwise.
 //
 // Example:

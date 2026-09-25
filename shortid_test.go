@@ -7,30 +7,30 @@ import (
 	"time"
 )
 
-// TestGenerateShortID_Length verifies every generated ID is exactly 11
+// TestShortID_Length verifies every generated ID is exactly 11
 // characters long, regardless of how many are generated in sequence.
-func TestGenerateShortID_Length(t *testing.T) {
+func TestShortID_Length(t *testing.T) {
 	for i := 0; i < 1000; i++ {
-		id := GenerateShortID()
+		id := ShortID()
 		if len(id) != 11 {
 			t.Fatalf("expected length 11, got %d for id %q", len(id), id)
 		}
 	}
 }
 
-// TestGenerateShortID_Lowercase verifies the output is always lowercase.
-func TestGenerateShortID_Lowercase(t *testing.T) {
-	id := GenerateShortID()
+// TestShortID_Lowercase verifies the output is always lowercase.
+func TestShortID_Lowercase(t *testing.T) {
+	id := ShortID()
 	if id != strings.ToLower(id) {
 		t.Fatalf("expected lowercase id, got %q", id)
 	}
 }
 
-// TestGenerateShortID_ValidAlphabet verifies every character in the ID
+// TestShortID_ValidAlphabet verifies every character in the ID
 // belongs to the Crockford Base32 alphabet (case-insensitively).
-func TestGenerateShortID_ValidAlphabet(t *testing.T) {
+func TestShortID_ValidAlphabet(t *testing.T) {
 	lowerAlphabet := strings.ToLower(alphabetCrockford)
-	id := GenerateShortID()
+	id := ShortID()
 	for _, c := range id {
 		if !strings.ContainsRune(lowerAlphabet, c) {
 			t.Fatalf("character %q in id %q is not in the Crockford alphabet", c, id)
@@ -38,15 +38,15 @@ func TestGenerateShortID_ValidAlphabet(t *testing.T) {
 	}
 }
 
-// TestGenerateShortID_SequentialUniqueness generates a large number of IDs
+// TestShortID_SequentialUniqueness generates a large number of IDs
 // back-to-back on a single goroutine (the worst case for hitting the same
 // microsecond repeatedly) and asserts none collide.
-func TestGenerateShortID_SequentialUniqueness(t *testing.T) {
+func TestShortID_SequentialUniqueness(t *testing.T) {
 	const n = 50000
 	seen := make(map[string]struct{}, n)
 
 	for i := 0; i < n; i++ {
-		id := GenerateShortID()
+		id := ShortID()
 		if _, exists := seen[id]; exists {
 			t.Fatalf("duplicate id generated: %q (iteration %d)", id, i)
 		}
@@ -54,10 +54,10 @@ func TestGenerateShortID_SequentialUniqueness(t *testing.T) {
 	}
 }
 
-// TestGenerateShortID_ConcurrentUniqueness generates IDs from many
+// TestShortID_ConcurrentUniqueness generates IDs from many
 // goroutines simultaneously and asserts the mutex-guarded counter logic
 // prevents any duplicates.
-func TestGenerateShortID_ConcurrentUniqueness(t *testing.T) {
+func TestShortID_ConcurrentUniqueness(t *testing.T) {
 	const goroutines = 50
 	const perGoroutine = 1000
 	const total = goroutines * perGoroutine
@@ -70,7 +70,7 @@ func TestGenerateShortID_ConcurrentUniqueness(t *testing.T) {
 		go func() {
 			defer wg.Done()
 			for i := 0; i < perGoroutine; i++ {
-				ids <- GenerateShortID()
+				ids <- ShortID()
 			}
 		}()
 	}
@@ -91,17 +91,17 @@ func TestGenerateShortID_ConcurrentUniqueness(t *testing.T) {
 	}
 }
 
-// TestGenerateShortID_CounterRollover forces more than 16 calls within
+// TestShortID_CounterRollover forces more than 16 calls within
 // (as close as possible to) the same microsecond by directly manipulating
 // the package-level state, verifying the overflow fallback path does not
 // panic and still yields a valid, correctly-shaped ID.
-func TestGenerateShortID_CounterRollover(t *testing.T) {
+func TestShortID_CounterRollover(t *testing.T) {
 	shortIDMutex.Lock()
 	lastShortIDStamp = time.Now().UnixMicro()
 	shortIDCounter = 16 // one past the max (0-15)
 	shortIDMutex.Unlock()
 
-	id := GenerateShortID()
+	id := ShortID()
 
 	if len(id) != 11 {
 		t.Fatalf("expected length 11 after rollover, got %d for id %q", len(id), id)
@@ -116,17 +116,17 @@ func TestGenerateShortID_CounterRollover(t *testing.T) {
 	}
 }
 
-// TestGenerateShortID_MonotonicWithinSameMicrosecond verifies that repeated
+// TestShortID_MonotonicWithinSameMicrosecond verifies that repeated
 // calls landing on the same timestamp produce different composite values
 // (i.e. the counter actually increments rather than silently reusing 0).
-func TestGenerateShortID_MonotonicWithinSameMicrosecond(t *testing.T) {
+func TestShortID_MonotonicWithinSameMicrosecond(t *testing.T) {
 	shortIDMutex.Lock()
 	fixedTS := time.Now().UnixMicro()
 	lastShortIDStamp = fixedTS
 	shortIDCounter = -1 // so the first call below increments to 0
 	shortIDMutex.Unlock()
 
-	first := GenerateShortID()
+	first := ShortID()
 
 	shortIDMutex.Lock()
 	// Force the same timestamp again to simulate a second call landing on
@@ -134,7 +134,7 @@ func TestGenerateShortID_MonotonicWithinSameMicrosecond(t *testing.T) {
 	lastShortIDStamp = fixedTS
 	shortIDMutex.Unlock()
 
-	second := GenerateShortID()
+	second := ShortID()
 
 	if first == second {
 		t.Fatalf("expected different ids for same-timestamp calls, got %q twice", first)
@@ -177,7 +177,7 @@ func TestIsShortID(t *testing.T) {
 		want bool
 	}{
 		{"valid 11-char id", "ab12cd3ef45", true},
-		{"generated id", GenerateShortID(), true},
+		{"generated id", ShortID(), true},
 		{"empty string", "", false},
 		{"too short", "ab12cd3", false},
 		{"too long", "ab12cd3ef45xyz", false},
