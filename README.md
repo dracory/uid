@@ -18,7 +18,7 @@ Below is a complete comparison of all ID generators available in this package, s
 
 | Generator Function | Description / Format | Length (Unformatted) | Length (Formatted) | Example Output |
 | :--- | :--- | :---: | :---: | :--- |
-| `GenerateShortID()` | Crockford Base32 (ts + 4-bit counter) | **11** | N/A | `sa4rc789wxg` |
+| `ShortID()` | Crockford Base32 (ts + 4-bit counter) | **11** | N/A | `sa4rc789wxg` |
 | `HumanUid()` | Dated digits (YYYYMMDD-HHMM-SSMM-MMMMNNNRRRRRRRRR) | **32** | **35** | `20250831151133000012345678901234` |
 | `NanoUid()` | Dated digits (YYYYMMDD-HHMMSS-MMMMMM-NNN) | **23** | **26** | `20250831151133000012345` |
 | `MicroUid()` | Dated digits (YYYYMMDD-HHMMSS-MMMMMM) | **20** | **22** | `20250831151133000012` |
@@ -44,9 +44,9 @@ import (
 )
 
 func main() {
-    // GenerateShortID generates a 11-character Crockford Base32 short ID
+    // ShortID generates a 11-character Crockford Base32 short ID
     // Format: microsecond timestamp (int64) + 4-bit rolling counter
-    shortID := uid.GenerateShortID() // length: 11, e.g. "sa4rc789wxg"
+    shortID := uid.ShortID() // length: 11, e.g. "sa4rc789wxg"
 
     // HumanUid generates a UID (32 digits)
     // Format: YYYYMMDD-HHMM-SSMM-MMMMNNNRRRRRRRRR
@@ -112,7 +112,7 @@ For most of the user cases a Micro UID (20 chars) should be fine. A human UID (3
 
     Format: Crockford Base32 encoded microsecond Unix timestamp + 4-bit rolling counter
 
-    `GenerateShortID()` is the fastest and shortest ID option since it avoids `time.Sleep` and random prime generation entirely.
+    `ShortID()` is the fastest and shortest ID option since it avoids `time.Sleep` and random prime generation entirely.
 
     Examples:
 
@@ -339,7 +339,7 @@ Using a sample `TimestampNano` (nanoseconds) as input:
 
 ## Change Log
 
-2026.09.20 - Added GenerateShortID()
+2026.09.20 - Added ShortID()
 
 2026.01.16 - Add ID shortening and unshortening (Base16,32,36,58,62,64,Crockford,ZBase32)
 
