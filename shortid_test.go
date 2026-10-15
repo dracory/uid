@@ -168,6 +168,149 @@ func TestNormalizeID(t *testing.T) {
 	}
 }
 
+// --- SafeShortID, HexShortID, ShortIDCustom ---
+
+// TestSafeShortID_Length verifies that SafeShortID always returns a 13-character string.
+func TestSafeShortID_Length(t *testing.T) {
+	for i := 0; i < 1000; i++ {
+		id := SafeShortID()
+		if len(id) != 13 {
+			t.Fatalf("expected length 13 for SafeShortID, got %d for id %q", len(id), id)
+		}
+	}
+}
+
+// TestHexShortID_Length verifies that HexShortID always returns a 13-character string.
+func TestHexShortID_Length(t *testing.T) {
+	for i := 0; i < 1000; i++ {
+		id := HexShortID()
+		if len(id) != 13 {
+			t.Fatalf("expected length 13 for HexShortID, got %d for id %q", len(id), id)
+		}
+	}
+}
+
+// TestSafeShortID_NoVowels verifies that SafeShortID outputs contain no vowels
+// ('a', 'e', 'i', 'o', 'u') and only contain characters from the Safe Base16 alphabet.
+func TestSafeShortID_NoVowels(t *testing.T) {
+	vowels := "aeiou"
+	validAlphabet := "0123456789bcdfrt"
+
+	for i := 0; i < 10000; i++ {
+		id := SafeShortID()
+		for _, c := range id {
+			if strings.ContainsRune(vowels, c) {
+				t.Fatalf("found vowel %q in SafeShortID output %q", string(c), id)
+			}
+			if !strings.ContainsRune(validAlphabet, c) {
+				t.Fatalf("character %q in SafeShortID %q is not in safe alphabet", string(c), id)
+			}
+		}
+	}
+}
+
+// TestHexShortID_ValidAlphabet verifies every character in HexShortID
+// belongs to standard lowercase hex ("0123456789abcdef").
+func TestHexShortID_ValidAlphabet(t *testing.T) {
+	validAlphabet := "0123456789abcdef"
+	for i := 0; i < 1000; i++ {
+		id := HexShortID()
+		for _, c := range id {
+			if !strings.ContainsRune(validAlphabet, c) {
+				t.Fatalf("character %q in HexShortID %q is not in hex alphabet", string(c), id)
+			}
+		}
+	}
+}
+
+// TestShortIDCustom verifies ShortIDCustom behavior with various custom alphabets
+// as well as the empty string fallback.
+func TestShortIDCustom(t *testing.T) {
+	t.Run("empty string fallback to hex", func(t *testing.T) {
+		id := ShortIDCustom("")
+		validAlphabet := "0123456789abcdef"
+		for _, c := range id {
+			if !strings.ContainsRune(validAlphabet, c) {
+				t.Fatalf("character %q in fallback output %q not in hex alphabet", string(c), id)
+			}
+		}
+	})
+
+	t.Run("digits only alphabet", func(t *testing.T) {
+		digits := "0123456789"
+		id := ShortIDCustom(digits)
+		if id == "" {
+			t.Fatal("expected non-empty string")
+		}
+		for _, c := range id {
+			if !strings.ContainsRune(digits, c) {
+				t.Fatalf("character %q in output %q not in custom alphabet %q", string(c), id, digits)
+			}
+		}
+	})
+
+	t.Run("custom uppercase alphabet", func(t *testing.T) {
+		alphabet := "ABCDEFGHJK"
+		id := ShortIDCustom(alphabet)
+		if id == "" {
+			t.Fatal("expected non-empty string")
+		}
+		for _, c := range id {
+			if !strings.ContainsRune(alphabet, c) {
+				t.Fatalf("character %q in output %q not in custom alphabet %q", string(c), id, alphabet)
+			}
+		}
+	})
+}
+
+// TestNewShortIDs_ConcurrentUniqueness generates IDs concurrently using SafeShortID,
+// HexShortID, and ShortIDCustom across multiple goroutines to verify uniqueness.
+func TestNewShortIDs_ConcurrentUniqueness(t *testing.T) {
+	const goroutines = 50
+	const perGoroutine = 1000
+	const total = goroutines * perGoroutine * 3
+
+	ids := make(chan string, total)
+	var wg sync.WaitGroup
+
+	for g := 0; g < goroutines; g++ {
+		wg.Add(3)
+		go func() {
+			defer wg.Done()
+			for i := 0; i < perGoroutine; i++ {
+				ids <- SafeShortID()
+			}
+		}()
+		go func() {
+			defer wg.Done()
+			for i := 0; i < perGoroutine; i++ {
+				ids <- HexShortID()
+			}
+		}()
+		go func() {
+			defer wg.Done()
+			for i := 0; i < perGoroutine; i++ {
+				ids <- ShortIDCustom("0123456789abcdefghijklmnopqrstuvwxyz")
+			}
+		}()
+	}
+
+	wg.Wait()
+	close(ids)
+
+	seen := make(map[string]struct{}, total)
+	for id := range ids {
+		if _, exists := seen[id]; exists {
+			t.Fatalf("duplicate id generated under concurrency: %q", id)
+		}
+		seen[id] = struct{}{}
+	}
+
+	if len(seen) != total {
+		t.Fatalf("expected %d unique ids, got %d", total, len(seen))
+	}
+}
+
 // --- IsShortID ---
 
 func TestIsShortID(t *testing.T) {
