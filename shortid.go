@@ -3,15 +3,22 @@ package uid
 import (
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
-// Package-level state for ShortID. Guarded by shortIDMutex to keep
-// ID generation collision-free under concurrent use.
+// Package-level state for ShortID functions.
 var (
 	shortIDMutex     sync.Mutex
 	lastShortIDStamp int64
 	shortIDCounter   int64
+
+	atomicCounter uint32
+)
+
+const (
+	safeShortAlphabet = "0123456789bcdfrt"
+	hexShortAlphabet  = "0123456789abcdef"
 )
 
 // ShortID creates a new 11-character lowercase short ID.
@@ -120,4 +127,80 @@ func NormalizeID(id string) string {
 func IsShortID(id string) bool {
 	length := len(id)
 	return length == 11
+}
+
+// SafeShortID generates a fixed 13-character lowercase short ID using a vowel-free Base 16 alphabet.
+// Core logic: microsecond timestamp (time.Now().UnixMicro()) shifted left by 4 bits,
+// combined with a 4-bit atomic rolling counter (atomic.AddUint32(&counter, 1) & 0x0F).
+// Alphabet (Base 16, vowel-free): "0123456789bcdfrt".
+// Replaces vowels ('a' and 'e' from standard hex) with hard consonants ('r' and 't')
+// to ensure zero accidental English words/profanities are generated, while avoiding
+// phonetic confusion and visual ambiguity.
+// Performance: Uses bitwise extraction (>> 4 and & 0x0F) for speed and zero allocations.
+//
+// Returns:
+//   - A 13-character lowercase string (e.g. "5fr88tc139r8t").
+func SafeShortID() string {
+	ts := time.Now().UnixMicro()
+	cnt := int64(atomic.AddUint32(&atomicCounter, 1) & 0x0F)
+	val := (ts << 4) | cnt
+
+	var buf [13]byte
+	for i := 12; i >= 0; i-- {
+		buf[i] = safeShortAlphabet[val&0x0f]
+		val >>= 4
+	}
+	return string(buf[:])
+}
+
+// HexShortID generates a standard 13-character lowercase hexadecimal short ID.
+// Uses the same bitwise timestamp and 4-bit atomic rolling counter logic as SafeShortID,
+// but formatted using the standard lowercase hex alphabet: "0123456789abcdef".
+//
+// Returns:
+//   - A 13-character lowercase hexadecimal string.
+func HexShortID() string {
+	ts := time.Now().UnixMicro()
+	cnt := int64(atomic.AddUint32(&atomicCounter, 1) & 0x0F)
+	val := (ts << 4) | cnt
+
+	var buf [13]byte
+	for i := 12; i >= 0; i-- {
+		buf[i] = hexShortAlphabet[val&0x0f]
+		val >>= 4
+	}
+	return string(buf[:])
+}
+
+// ShortIDCustom generates a time-ordered short ID using a user-provided custom alphabet string.
+// Encodes the combined (timestamp << 4) | counter value using modulo arithmetic against
+// the length of the provided alphabet string.
+//
+// Parameters:
+//   - alphabet: a string containing characters to use for encoding. If empty, defaults to "0123456789abcdef".
+//
+// Returns:
+//   - A time-ordered short ID encoded with the custom alphabet.
+func ShortIDCustom(alphabet string) string {
+	if alphabet == "" {
+		alphabet = hexShortAlphabet
+	}
+
+	ts := time.Now().UnixMicro()
+	cnt := int64(atomic.AddUint32(&atomicCounter, 1) & 0x0F)
+	val := (ts << 4) | cnt
+
+	if val == 0 {
+		return string(alphabet[0])
+	}
+
+	base := int64(len(alphabet))
+	var buf [32]byte
+	i := len(buf)
+	for val > 0 {
+		i--
+		buf[i] = alphabet[val%base]
+		val /= base
+	}
+	return string(buf[i:])
 }
