@@ -19,6 +19,9 @@ Below is a complete comparison of all ID generators available in this package, s
 | Generator Function | Description / Format | Length (Unformatted) | Length (Formatted) | Example Output |
 | :--- | :--- | :---: | :---: | :--- |
 | `ShortID()` | Crockford Base32 (ts + 4-bit counter) | **11** | N/A | `sa4rc789wxg` |
+| `SafeShortID()` | Vowel-free Base16 (ts + 4-bit counter) | **14** | N/A | `05fr88tc139r8t` |
+| `HexShortID()` | Hexadecimal (ts + 4-bit counter) | **14** | N/A | `015fa88bc139a8f` |
+| `ShortIDCustom(alphabet)` | Custom alphabet (ts + 4-bit counter) | varies | N/A | `5fr88tc139r8t` |
 | `HumanUid()` | Dated digits (YYYYMMDD-HHMM-SSMM-MMMMNNNRRRRRRRRR) | **32** | **35** | `20250831151133000012345678901234` |
 | `NanoUid()` | Dated digits (YYYYMMDD-HHMMSS-MMMMMM-NNN) | **23** | **26** | `20250831151133000012345` |
 | `MicroUid()` | Dated digits (YYYYMMDD-HHMMSS-MMMMMM) | **20** | **22** | `20250831151133000012` |
@@ -44,9 +47,24 @@ import (
 )
 
 func main() {
-    // ShortID generates a 11-character Crockford Base32 short ID
+    // ShortID generates an 11-character Crockford Base32 short ID
     // Format: microsecond timestamp (int64) + 4-bit rolling counter
     shortID := uid.ShortID() // length: 11, e.g. "sa4rc789wxg"
+
+    // SafeShortID generates a 14-character vowel-free Base16 short ID
+    // (alphabet "0123456789bcdfrt" - avoids accidental English words)
+    safeID := uid.SafeShortID() // length: 14, e.g. "05fr88tc139r8t"
+
+    // HexShortID generates a 14-character lowercase hexadecimal short ID
+    hexID := uid.HexShortID() // length: 14
+
+    // ShortIDCustom encodes the same time-ordered value with a custom alphabet
+    // (min 2 unique ASCII chars; panics on invalid alphabets)
+    customID := uid.ShortIDCustom("0123456789abcdefghijklmnopqrstuvwxyz")
+
+    // Helpers for validation and normalization
+    ok := uid.IsShortID(shortID)           // checks length and charset
+    norm := uid.NormalizeID("  " + shortID) // trims whitespace, lowercases
 
     // HumanUid generates a UID (32 digits)
     // Format: YYYYMMDD-HHMM-SSMM-MMMMNNNRRRRRRRRR
@@ -87,7 +105,8 @@ func main() {
     v7 := uid.UuidV7()               // v7 unformatted, length: 32
     v7f := uid.UuidV7(true)          // v7 formatted, length: 36
 
-    fmt.Println(shortID, human, humanF, nano, nanoF, micro, microF, sec, secF,
+    fmt.Println(shortID, safeID, hexID, customID, ok, norm,
+        human, humanF, nano, nanoF, micro, microF, sec, secF,
         ts, tsu, tsn, u4, u4f, v1, v1f, v3, v3f, v5, v5f, v6, v6f, v7, v7f)
 
     // ID Shortening
@@ -108,15 +127,20 @@ The type you want to use will usually depends on two considerations:
 
 For most of the user cases a Micro UID (20 chars) should be fine. A human UID (32 chars) should be avoided where a human is involved as too "mind bogging" to work with.
 
-0. Short ID (11 characters)
+0. Short ID (11-14 characters)
 
-    Format: Crockford Base32 encoded microsecond Unix timestamp + 4-bit rolling counter
+    Format: microsecond Unix timestamp + 4-bit rolling counter, encoded in a base alphabet.
 
-    `ShortID()` is the fastest and shortest ID option since it avoids `time.Sleep` and random prime generation entirely.
+    All short IDs share one lock-free atomic generator, are time-ordered (lexicographic sort matches chronological order), and never sleep — on counter overflow the timestamp is bumped by one microsecond instead.
 
-    Examples:
+    - `ShortID()` - 11 chars, Crockford Base32 lowercase, e.g. `sa4rc789wxg`
+    - `SafeShortID()` - 14 chars, vowel-free Base16 (`0123456789bcdfrt`), e.g. `05fr88tc139r8t`
+    - `HexShortID()` - 14 chars, standard lowercase hex
+    - `ShortIDCustom(alphabet)` - custom alphabet (min 2 unique ASCII chars, ascending order recommended for sortable IDs)
+    - `IsShortID(id)` - validates ShortID format (length + charset)
+    - `NormalizeID(id)` - trims whitespace and lowercases
 
-    `sa4rc789wxg`
+    Note: uniqueness is per-process only and IDs reveal their creation time. Suitable for sortable database keys, not for security tokens or unguessable public identifiers. `ShortID()` grows to 12 chars from ~2041; `SafeShortID()`/`HexShortID()` are fixed at 14 chars until ~2112.
 
 1. Human UID (32 digits)
 
@@ -338,6 +362,8 @@ Using a sample `TimestampNano` (nanoseconds) as input:
 
 
 ## Change Log
+
+2026.10.15 - Reworked short ID generators: lock-free CAS state, SafeShortID()/HexShortID() widened to 14 chars, ShortIDCustom() alphabet validation, IsShortID() charset check
 
 2026.09.20 - Added ShortID()
 
