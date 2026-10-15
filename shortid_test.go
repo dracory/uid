@@ -91,28 +91,55 @@ func TestShortID_ConcurrentUniqueness(t *testing.T) {
 	}
 }
 
-// TestShortID_CounterRollover forces more than 16 calls within
-// (as close as possible to) the same microsecond by directly manipulating
-// the package-level state, verifying the overflow fallback path does not
-// panic and still yields a valid, correctly-shaped ID.
+// TestShortID_CounterRollover forces the clock to a fixed microsecond so the
+// 4-bit counter overflows (more than 16 IDs on one tick), verifying the
+// timestamp is bumped forward and all IDs remain unique.
 func TestShortID_CounterRollover(t *testing.T) {
-	shortIDMutex.Lock()
-	lastShortIDStamp = time.Now().UnixMicro()
-	shortIDCounter = 16 // one past the max (0-15)
-	shortIDMutex.Unlock()
+	old := nowMicro
+	oldState := shortIDAtomicState.Load()
+	defer func() { nowMicro = old; shortIDAtomicState.Store(oldState) }()
 
-	id := ShortID()
+	fixed := time.Now().UnixMicro()
+	nowMicro = func() int64 { return fixed }
+	shortIDAtomicState.Store(0)
 
-	if len(id) != 11 {
-		t.Fatalf("expected length 11 after rollover, got %d for id %q", len(id), id)
+	seen := map[string]struct{}{}
+	for i := 0; i < 100; i++ {
+		id := ShortID()
+		if len(id) != shortIDLength {
+			t.Fatalf("expected length %d after rollover, got %d for id %q", shortIDLength, len(id), id)
+		}
+		if _, dup := seen[id]; dup {
+			t.Fatalf("duplicate id after counter rollover: %q", id)
+		}
+		seen[id] = struct{}{}
 	}
 
-	shortIDMutex.Lock()
-	counterAfter := shortIDCounter
-	shortIDMutex.Unlock()
+	// The stored timestamp must have advanced past the fixed injected time.
+	if ts := int64(shortIDAtomicState.Load() >> 4); ts <= fixed {
+		t.Fatalf("expected timestamp to advance past %d after rollover, got %d", fixed, ts)
+	}
+}
 
-	if counterAfter > 15 {
-		t.Fatalf("expected counter to reset to <=15 after rollover, got %d", counterAfter)
+// TestShortID_BackwardsClock verifies that a clock moving backwards (NTP step,
+// VM resume) does not reset the counter or produce duplicate IDs.
+func TestShortID_BackwardsClock(t *testing.T) {
+	old := nowMicro
+	oldState := shortIDAtomicState.Load()
+	defer func() { nowMicro = old; shortIDAtomicState.Store(oldState) }()
+
+	current := int64(2000000000000)
+	nowMicro = func() int64 { return current }
+	shortIDAtomicState.Store(0)
+
+	first := ShortID()
+
+	// Step the clock backwards, then generate again.
+	current -= 60_000_000 // one minute earlier
+	second := ShortID()
+
+	if first == second {
+		t.Fatalf("duplicate id after backwards clock step: %q", first)
 	}
 }
 
@@ -120,24 +147,34 @@ func TestShortID_CounterRollover(t *testing.T) {
 // calls landing on the same timestamp produce different composite values
 // (i.e. the counter actually increments rather than silently reusing 0).
 func TestShortID_MonotonicWithinSameMicrosecond(t *testing.T) {
-	shortIDMutex.Lock()
-	fixedTS := time.Now().UnixMicro()
-	lastShortIDStamp = fixedTS
-	shortIDCounter = -1 // so the first call below increments to 0
-	shortIDMutex.Unlock()
+	old := nowMicro
+	oldState := shortIDAtomicState.Load()
+	defer func() { nowMicro = old; shortIDAtomicState.Store(oldState) }()
+
+	nowMicro = func() int64 { return int64(3000000000000) }
+	shortIDAtomicState.Store(0)
 
 	first := ShortID()
-
-	shortIDMutex.Lock()
-	// Force the same timestamp again to simulate a second call landing on
-	// the identical microsecond tick.
-	lastShortIDStamp = fixedTS
-	shortIDMutex.Unlock()
-
 	second := ShortID()
 
 	if first == second {
 		t.Fatalf("expected different ids for same-timestamp calls, got %q twice", first)
+	}
+	if !(first < second) {
+		t.Fatalf("expected lexicographically increasing ids, got %q then %q", first, second)
+	}
+}
+
+// TestShortID_LexicographicOrdering verifies generated IDs sort in
+// chronological order (the alphabet is ascending).
+func TestShortID_LexicographicOrdering(t *testing.T) {
+	prev := ShortID()
+	for i := 0; i < 1000; i++ {
+		id := ShortID()
+		if id <= prev {
+			t.Fatalf("ids not strictly increasing: %q then %q", prev, id)
+		}
+		prev = id
 	}
 }
 
@@ -170,22 +207,22 @@ func TestNormalizeID(t *testing.T) {
 
 // --- SafeShortID, HexShortID, ShortIDCustom ---
 
-// TestSafeShortID_Length verifies that SafeShortID always returns a 13-character string.
+// TestSafeShortID_Length verifies that SafeShortID always returns a 14-character string.
 func TestSafeShortID_Length(t *testing.T) {
 	for i := 0; i < 1000; i++ {
 		id := SafeShortID()
-		if len(id) != 13 {
-			t.Fatalf("expected length 13 for SafeShortID, got %d for id %q", len(id), id)
+		if len(id) != 14 {
+			t.Fatalf("expected length 14 for SafeShortID, got %d for id %q", len(id), id)
 		}
 	}
 }
 
-// TestHexShortID_Length verifies that HexShortID always returns a 13-character string.
+// TestHexShortID_Length verifies that HexShortID always returns a 14-character string.
 func TestHexShortID_Length(t *testing.T) {
 	for i := 0; i < 1000; i++ {
 		id := HexShortID()
-		if len(id) != 13 {
-			t.Fatalf("expected length 13 for HexShortID, got %d for id %q", len(id), id)
+		if len(id) != 14 {
+			t.Fatalf("expected length 14 for HexShortID, got %d for id %q", len(id), id)
 		}
 	}
 }
@@ -261,6 +298,68 @@ func TestShortIDCustom(t *testing.T) {
 			}
 		}
 	})
+
+	t.Run("binary alphabet", func(t *testing.T) {
+		id := ShortIDCustom("01")
+		for _, c := range id {
+			if c != '0' && c != '1' {
+				t.Fatalf("unexpected character %q in binary output %q", c, id)
+			}
+		}
+	})
+
+	t.Run("panics on single-char alphabet", func(t *testing.T) {
+		defer func() {
+			if recover() == nil {
+				t.Fatal("expected panic for 1-character alphabet")
+			}
+		}()
+		ShortIDCustom("x")
+	})
+
+	t.Run("panics on duplicate characters", func(t *testing.T) {
+		defer func() {
+			if recover() == nil {
+				t.Fatal("expected panic for alphabet with duplicates")
+			}
+		}()
+		ShortIDCustom("aab")
+	})
+
+	t.Run("panics on non-ASCII alphabet", func(t *testing.T) {
+		defer func() {
+			if recover() == nil {
+				t.Fatal("expected panic for multi-byte alphabet")
+			}
+		}()
+		ShortIDCustom("αβγδεζηθικλμ")
+	})
+}
+
+// FuzzShortIDCustom exercises ShortIDCustom over arbitrary alphabet inputs,
+// ensuring it never panics for valid alphabets and panics cleanly otherwise.
+func FuzzShortIDCustom(f *testing.F) {
+	f.Add("01")
+	f.Add("0123456789abcdef")
+	f.Add("x")
+	f.Add("aab")
+	f.Add("日本語")
+	f.Fuzz(func(t *testing.T, alphabet string) {
+		defer func() {
+			// Panics for invalid alphabets are acceptable; out-of-bounds
+			// writes are not (they would crash rather than panic).
+			_ = recover()
+		}()
+		id := ShortIDCustom(alphabet)
+		if alphabet == "" {
+			alphabet = hexShortAlphabet // matches the empty-string fallback
+		}
+		for i := 0; i < len(id); i++ {
+			if strings.IndexByte(alphabet, id[i]) < 0 {
+				t.Fatalf("output %q contains byte not in alphabet %q", id, alphabet)
+			}
+		}
+	})
 }
 
 // TestNewShortIDs_ConcurrentUniqueness generates IDs concurrently using SafeShortID,
@@ -325,7 +424,10 @@ func TestIsShortID(t *testing.T) {
 		{"too short", "ab12cd3", false},
 		{"too long", "ab12cd3ef45xyz", false},
 		{"one char short", "ab12cd3ef4", false},
-		{"one char long", "ab12cd3ef456", false},
+		{"valid 12-char id (post-2041 format)", "ab12cd3ef456", true},
+		{"too long (13 chars)", "ab12cd3ef4567", false},
+		{"right length but invalid charset", "hello world", false},
+		{"chars outside crockford alphabet", "iluao012345", false},
 	}
 
 	for _, c := range cases {
