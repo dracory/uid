@@ -13,7 +13,7 @@ var (
 	lastShortIDStamp int64
 	shortIDCounter   int64
 
-	atomicCounter uint32
+	shortIDAtomicState uint64
 )
 
 const (
@@ -129,6 +129,39 @@ func IsShortID(id string) bool {
 	return length == 11
 }
 
+// nextShortIDValue atomically generates a unique 55-bit composite value
+// combining time.Now().UnixMicro() (shifted left 4 bits) and a 4-bit rolling counter (0-15).
+// Uses atomic CompareAndSwapUint64 to ensure thread safety and uniqueness under concurrency.
+func nextShortIDValue() int64 {
+	for {
+		now := time.Now().UnixMicro()
+		oldState := atomic.LoadUint64(&shortIDAtomicState)
+		oldTS := int64(oldState >> 4)
+		oldCnt := int64(oldState & 0x0F)
+
+		var newTS int64
+		var newCnt int64
+
+		if now > oldTS {
+			newTS = now
+			newCnt = 0
+		} else {
+			newCnt = oldCnt + 1
+			if newCnt > 0x0F {
+				newTS = oldTS + 1
+				newCnt = 0
+			} else {
+				newTS = oldTS
+			}
+		}
+
+		newState := uint64((newTS << 4) | newCnt)
+		if atomic.CompareAndSwapUint64(&shortIDAtomicState, oldState, newState) {
+			return int64(newState)
+		}
+	}
+}
+
 // SafeShortID generates a fixed 13-character lowercase short ID using a vowel-free Base 16 alphabet.
 // Core logic: microsecond timestamp (time.Now().UnixMicro()) shifted left by 4 bits,
 // combined with a 4-bit atomic rolling counter (atomic.AddUint32(&counter, 1) & 0x0F).
@@ -141,9 +174,7 @@ func IsShortID(id string) bool {
 // Returns:
 //   - A 13-character lowercase string (e.g. "5fr88tc139r8t").
 func SafeShortID() string {
-	ts := time.Now().UnixMicro()
-	cnt := int64(atomic.AddUint32(&atomicCounter, 1) & 0x0F)
-	val := (ts << 4) | cnt
+	val := nextShortIDValue()
 
 	var buf [13]byte
 	for i := 12; i >= 0; i-- {
@@ -160,9 +191,7 @@ func SafeShortID() string {
 // Returns:
 //   - A 13-character lowercase hexadecimal string.
 func HexShortID() string {
-	ts := time.Now().UnixMicro()
-	cnt := int64(atomic.AddUint32(&atomicCounter, 1) & 0x0F)
-	val := (ts << 4) | cnt
+	val := nextShortIDValue()
 
 	var buf [13]byte
 	for i := 12; i >= 0; i-- {
@@ -186,9 +215,7 @@ func ShortIDCustom(alphabet string) string {
 		alphabet = hexShortAlphabet
 	}
 
-	ts := time.Now().UnixMicro()
-	cnt := int64(atomic.AddUint32(&atomicCounter, 1) & 0x0F)
-	val := (ts << 4) | cnt
+	val := nextShortIDValue()
 
 	if val == 0 {
 		return string(alphabet[0])
