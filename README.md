@@ -52,8 +52,8 @@ func main() {
     shortID := uid.ShortID() // length: 11, e.g. "sa4rc789wxg"
 
     // SafeShortID generates a 14-character vowel-free Base16 short ID
-    // (alphabet "0123456789bcdfrt" - avoids accidental English words)
-    safeID := uid.SafeShortID() // length: 14, e.g. "05fr88tc139r8t"
+    // (alphabet "0123456789bcdfgh" - avoids accidental English words)
+    safeID := uid.SafeShortID() // length: 14, e.g. "05fh88gd139f8h"
 
     // HexShortID generates a 14-character lowercase hexadecimal short ID
     hexID := uid.HexShortID() // length: 14
@@ -134,7 +134,7 @@ For most of the user cases a Micro UID (20 chars) should be fine. A human UID (3
     All short IDs share one lock-free atomic generator, are time-ordered (lexicographic sort matches chronological order), and never sleep — on counter overflow the timestamp is bumped by one microsecond instead.
 
     - `ShortID()` - 11 chars, Crockford Base32 lowercase, e.g. `sa4rc789wxg`
-    - `SafeShortID()` - 14 chars, vowel-free Base16 (`0123456789bcdfrt`), e.g. `05fr88tc139r8t`
+    - `SafeShortID()` - 14 chars, vowel-free Base16 (`0123456789bcdfgh`), e.g. `05fh88gd139f8h`
     - `HexShortID()` - 14 chars, standard lowercase hex
     - `ShortIDCustom(alphabet)` - custom alphabet (min 2 unique ASCII chars, ascending order recommended for sortable IDs)
     - `IsShortID(id)` - validates ShortID format (length + charset)

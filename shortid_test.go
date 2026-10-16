@@ -231,7 +231,7 @@ func TestHexShortID_Length(t *testing.T) {
 // ('a', 'e', 'i', 'o', 'u') and only contain characters from the Safe Base16 alphabet.
 func TestSafeShortID_NoVowels(t *testing.T) {
 	vowels := "aeiou"
-	validAlphabet := "0123456789bcdfrt"
+	validAlphabet := "0123456789bcdfgh"
 
 	for i := 0; i < 10000; i++ {
 		id := SafeShortID()

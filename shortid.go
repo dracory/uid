@@ -19,7 +19,7 @@ var (
 )
 
 const (
-	safeShortAlphabet       = "0123456789bcdfrt"
+	safeShortAlphabet       = "0123456789bcdfgh"
 	hexShortAlphabet        = "0123456789abcdef"
 	crockfordLowerAlphabet  = "0123456789abcdefghjkmnpqrstvwxyz"
 	shortIDLength           = 11 // base32 digits needed for the 55-bit composite
@@ -158,14 +158,15 @@ func nextShortIDValue() int64 {
 // SafeShortID generates a fixed 14-character lowercase short ID using a vowel-free Base 16 alphabet.
 // Core logic: microsecond timestamp shifted left by 4 bits, combined with a 4-bit
 // rolling counter, produced by nextShortIDValue.
-// Alphabet (Base 16, vowel-free): "0123456789bcdfrt".
-// Every letter of standard hex is shifted to a non-vowel ('a'->'b' ... 'e'->'r',
-// 'f'->'t') to avoid generating accidental English words; this greatly reduces
-// but does not eliminate them (leet-speak like "b00b" is still reachable).
+// Alphabet (Base 16, vowel-free): "0123456789bcdfgh".
+// Every letter of standard hex is shifted to the next sequential consonant
+// ('a'->'b', 'b'->'c', 'c'->'d', 'd'->'f', 'e'->'g', 'f'->'h') to avoid
+// generating accidental English words; this greatly reduces but does not
+// eliminate them (leet-speak like "b00b" is still reachable).
 // The alphabet is in ascending byte order, so generated IDs sort chronologically.
 //
 // Returns:
-//   - A 14-character lowercase string (e.g. "05fr88tc139r8t").
+//   - A 14-character lowercase string (e.g. "05fh88gd139f8h").
 func SafeShortID() string {
 	return encodeHexFixed(nextShortIDValue(), safeShortAlphabet, shortIDHexEncodedLength)
 }
