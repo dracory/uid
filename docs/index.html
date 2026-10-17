@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>dracory/uid - Interactive UID Generator & Showcase</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --border-color: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-color: #38bdf8;
+      --accent-hover: #0284c7;
+      --success-color: #4ade80;
+      --code-bg: #0f172a;
+      --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      line-height: 1.6;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      color: var(--accent-color);
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+
+    .badge-bar {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+
+    .badge strong {
+      color: var(--accent-color);
+    }
+
+    .actions-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 1rem 1.5rem;
+      border-radius: 0.75rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .btn {
+      background-color: var(--accent-color);
+      color: #0f172a;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn:hover {
+      background-color: var(--accent-hover);
+      color: #ffffff;
+    }
+
+    .btn-secondary {
+      background-color: transparent;
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--border-color);
+      color: var(--text-main);
+    }
+
+    .toggle-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      font-size: 0.95rem;
+      user-select: none;
+    }
+
+    .toggle-label input[type="checkbox"] {
+      width: 1.1rem;
+      height: 1.1rem;
+      accent-color: var(--accent-color);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: border-color 0.2s ease;
+    }
+
+    .card:hover {
+      border-color: var(--accent-color);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--accent-color);
+      font-family: var(--font-mono);
+    }
+
+    .card-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .output-box {
+      background-color: var(--code-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      padding: 0.75rem;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      word-break: break-all;
+      position: relative;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .output-value {
+      color: var(--success-color);
+      flex-grow: 1;
+    }
+
+    .copy-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.8rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 0.25rem;
+      transition: color 0.2s;
+    }
+
+    .copy-btn:hover {
+      color: var(--accent-color);
+    }
+
+    .meta-tag {
+      font-size: 0.75rem;
+      background-color: rgba(56, 189, 248, 0.1);
+      color: var(--accent-color);
+      padding: 0.15rem 0.5rem;
+      border-radius: 0.25rem;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+
+    section {
+      margin-bottom: 3rem;
+    }
+
+    section h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.5rem;
+      color: var(--text-main);
+    }
+
+    .shortener-section {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .input-group input {
+      flex: 1;
+      min-width: 250px;
+      background-color: var(--code-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 1rem;
+    }
+
+    .shortener-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-top: 4rem;
+      border-top: 1px solid var(--border-color);
+      padding-top: 1.5rem;
+    }
+
+    footer a {
+      color: var(--accent-color);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>UID Interactive Playground</h1>
+      <p>High-performance unique string generator and shortening library for Go</p>
+      <div class="badge-bar">
+        <a href="https://github.com/dracory/uid" class="badge">Repo: <strong>dracory/uid</strong></a>
+        <span class="badge">Go 1.21+</span>
+        <span class="badge">Zero Dependencies</span>
+      </div>
+    </header>
+
+    <div class="actions-bar">
+      <div>
+        <button class="btn" id="generate-all-btn">⚡ Regenerate All UIDs</button>
+      </div>
+      <label class="toggle-label">
+        <input type="checkbox" id="format-toggle" checked>
+        Format UIDs with hyphens where applicable
+      </label>
+    </div>
+
+    <section>
+      <h2>Short IDs (Time-Ordered, High Throughput)</h2>
+      <div class="grid">
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">ShortID()</span>
+              <span class="meta-tag">11 Chars</span>
+            </div>
+            <p class="card-desc">Crockford Base32 encoded microsecond timestamp with 4-bit rolling counter.</p>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-shortid">-</span>
+            <button class="copy-btn" onclick="copyValue('out-shortid')">Copy</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">SafeShortID()</span>
+              <span class="meta-tag">14 Chars</span>
+            </div>
+            <p class="card-desc">Vowel-free Base16 encoding (0-9, bcdfgh) to avoid accidental bad words.</p>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-safeshortid">-</span>
+            <button class="copy-btn" onclick="copyValue('out-safeshortid')">Copy</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">HexShortID()</span>
+              <span class="meta-tag">14 Chars</span>
+            </div>
+            <p class="card-desc">Standard lowercase hexadecimal encoded time-ordered short ID.</p>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-hexshortid">-</span>
+            <button class="copy-btn" onclick="copyValue('out-hexshortid')">Copy</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Human-Friendly Dated UIDs</h2>
+      <div class="grid">
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">HumanUid()</span>
+              <span class="meta-tag" id="tag-humanuid">35 Chars</span>
+            </div>
+            <p class="card-desc">YYYYMMDD-HHMM-SSMM-MMMMNNNRRRRRRRRR formatted numeric ID.</p>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-humanuid">-</span>
+            <button class="copy-btn" onclick="copyValue('out-humanuid')">Copy</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">NanoUid()</span>
+              <span class="meta-tag" id="tag-nanouid">26 Chars</span>
+            </div>
+            <p class="card-desc">YYYYMMDD-HHMMSS-MMMMMM-NNN formatted time-prefixed ID.</p>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-nanouid">-</span>
+            <button class="copy-btn" onclick="copyValue('out-nanouid')">Copy</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">MicroUid()</span>
+              <span class="meta-tag" id="tag-microuid">22 Chars</span>
+            </div>
+            <p class="card-desc">YYYYMMDD-HHMMSS-MMMMMM recommended for general usage.</p>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-microuid">-</span>
+            <button class="copy-btn" onclick="copyValue('out-microuid')">Copy</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">SecUid()</span>
+              <span class="meta-tag" id="tag-secuid">15 Chars</span>
+            </div>
+            <p class="card-desc">YYYYMMDD-HHMMSS UTC timestamp ID to second precision.</p>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-secuid">-</span>
+            <button class="copy-btn" onclick="copyValue('out-secuid')">Copy</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Standard UUIDs</h2>
+      <div class="grid">
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">Uuid() / UuidV4()</span>
+              <span class="meta-tag" id="tag-uuidv4">36 Chars</span>
+            </div>
+            <p class="card-desc">Cryptographically strong random UUID v4.</p>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-uuidv4">-</span>
+            <button class="copy-btn" onclick="copyValue('out-uuidv4')">Copy</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">UuidV1()</span>
+              <span class="meta-tag" id="tag-uuidv1">36 Chars</span>
+            </div>
+            <p class="card-desc">Time-based UUID version 1.</p>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-uuidv1">-</span>
+            <button class="copy-btn" onclick="copyValue('out-uuidv1')">Copy</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">UuidV6()</span>
+              <span class="meta-tag" id="tag-uuidv6">36 Chars</span>
+            </div>
+            <p class="card-desc">Field-compatible reorder of UUID v1 for DB indexing.</p>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-uuidv6">-</span>
+            <button class="copy-btn" onclick="copyValue('out-uuidv6')">Copy</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">UuidV7()</span>
+              <span class="meta-tag" id="tag-uuidv7">36 Chars</span>
+            </div>
+            <p class="card-desc">Unix Epoch time-based UUID version 7.</p>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-uuidv7">-</span>
+            <button class="copy-btn" onclick="copyValue('out-uuidv7')">Copy</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Unix Timestamps</h2>
+      <div class="grid">
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">Timestamp()</span>
+              <span class="meta-tag">10 Chars</span>
+            </div>
+            <p class="card-desc">Unix timestamp in seconds.</p>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-timestamp">-</span>
+            <button class="copy-btn" onclick="copyValue('out-timestamp')">Copy</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">TimestampMicro()</span>
+              <span class="meta-tag">16 Chars</span>
+            </div>
+            <p class="card-desc">Unix timestamp in microseconds.</p>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-timestamp-micro">-</span>
+            <button class="copy-btn" onclick="copyValue('out-timestamp-micro')">Copy</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">TimestampNano()</span>
+              <span class="meta-tag">19 Chars</span>
+            </div>
+            <p class="card-desc">Unix timestamp in nanoseconds.</p>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-timestamp-nano">-</span>
+            <button class="copy-btn" onclick="copyValue('out-timestamp-nano')">Copy</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Interactive ID Shortener</h2>
+      <div class="shortener-section">
+        <p style="margin-bottom: 1rem; color: var(--text-muted);">Shorten numeric IDs (such as HumanUid or MicroUid) into compact representations using custom base encodings:</p>
+        <div class="input-group">
+          <input type="text" id="shorten-input" value="20261017055949471494" placeholder="Enter numeric ID string...">
+          <button class="btn btn-secondary" id="random-shorten-input-btn">Use Current MicroUid</button>
+        </div>
+
+        <div class="shortener-grid" id="shortener-results">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <p>Created for <a href="https://github.com/dracory/uid" target="_blank">github.com/dracory/uid</a> • Distributed under the Open Source License.</p>
+    </footer>
+  </div>
+
+  <script src="uid.js"></script>
+</body>
+</html>
