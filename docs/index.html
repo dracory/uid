@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>dracory/uid - Interactive UID Generator & Showcase</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --border-color: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-color: #38bdf8;
+      --accent-hover: #0284c7;
+      --success-color: #4ade80;
+      --code-bg: #0f172a;
+      --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      line-height: 1.6;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      color: var(--accent-color);
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+
+    .badge-bar {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+
+    .badge strong {
+      color: var(--accent-color);
+    }
+
+    .actions-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 1rem 1.5rem;
+      border-radius: 0.75rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .btn {
+      background-color: var(--accent-color);
+      color: #0f172a;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn:hover {
+      background-color: var(--accent-hover);
+      color: #ffffff;
+    }
+
+    .btn-secondary {
+      background-color: transparent;
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--border-color);
+      color: var(--text-main);
+    }
+
+    .toggle-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      font-size: 0.95rem;
+      user-select: none;
+    }
+
+    .toggle-label input[type="checkbox"] {
+      width: 1.1rem;
+      height: 1.1rem;
+      accent-color: var(--accent-color);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: border-color 0.2s ease;
+    }
+
+    .card:hover {
+      border-color: var(--accent-color);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--accent-color);
+      font-family: var(--font-mono);
+    }
+
+    .card-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .output-box {
+      background-color: var(--code-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      padding: 0.75rem;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      word-break: break-all;
+      position: relative;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .output-value {
+      color: var(--success-color);
+      flex-grow: 1;
+    }
+
+    .copy-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.8rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 0.25rem;
+      transition: color 0.2s;
+    }
+
+    .copy-btn:hover {
+      color: var(--accent-color);
+    }
+
+    .meta-tag {
+      font-size: 0.75rem;
+      background-color: rgba(56, 189, 248, 0.1);
+      color: var(--accent-color);
+      padding: 0.15rem 0.5rem;
+      border-radius: 0.25rem;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+
+    section {
+      margin-bottom: 3rem;
+    }
+
+    section h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.5rem;
+      color: var(--text-main);
+    }
+
+    .shortener-section {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .input-group input {
+      flex: 1;
+      min-width: 250px;
+      background-color: var(--code-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 1rem;
+    }
+
+    .shortener-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-top: 4rem;
+      border-top: 1px solid var(--border-color);
+      padding-top: 1.5rem;
+    }
+
+    footer a {
+      color: var(--accent-color);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>UID Interactive Playground</h1>
+      <p>High-performance unique string generator and shortening library for Go</p>
+      <div class="badge-bar">
+        <a href="https://github.com/dracory/uid" class="badge">Repo: <strong>dracory/uid</strong></a>
+        <span class="badge">Go 1.21+</span>
+        <span class="badge">Zero Dependencies</span>
+      </div>
+    </header>
+
+    <div class="actions-bar">
+      <div>
+        <button class="btn" id="generate-all-btn">⚡ Regenerate All UIDs</button>
+      </div>
+      <label class="toggle-label">
+        <input type="checkbox" id="format-toggle" checked>
+        Format UIDs with hyphens where applicable
+      </label>
+    </div>
+
+    <section>
+      <h2>Short IDs (Time-Ordered, High Throughput)</h2>
+      <div class="grid">
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">ShortID()</span>
+              <span class="meta-tag">11 Chars</span>
+            </div>
+            <p class="card-desc">Crockford Base32 encoded microsecond timestamp with 4-bit rolling counter.</p>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-shortid">-</span>
+            <button class="copy-btn" onclick="copyValue('out-shortid')">Copy</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">SafeShortID()</span>
+              <span class="meta-tag">14 Chars</span>
+            </div>
+            <p class="card-desc">Vowel-free Base16 encoding (0-9, bcdfgh) to avoid accidental bad words.</p>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-safeshortid">-</span>
+            <button class="copy-btn" onclick="copyValue('out-safeshortid')">Copy</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">HexShortID()</span>
+              <span class="meta-tag">14 Chars</span>
+            </div>
+            <p class="card-desc">Standard lowercase hexadecimal encoded time-ordered short ID.</p>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-hexshortid">-</span>
+            <button class="copy-btn" onclick="copyValue('out-hexshortid')">Copy</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Human-Friendly Dated UIDs</h2>
+      <div class="grid">
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">HumanUid()</span>
+              <span class="meta-tag" id="tag-humanuid">35 Chars</span>
+            </div>
+            <p class="card-desc">YYYYMMDD-HHMM-SSMM-MMMMNNNRRRRRRRRR formatted numeric ID.</p>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-humanuid">-</span>
+            <button class="copy-btn" onclick="copyValue('out-humanuid')">Copy</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">NanoUid()</span>
+              <span class="meta-tag" id="tag-nanouid">26 Chars</span>
+            </div>
+            <p class="card-desc">YYYYMMDD-HHMMSS-MMMMMM-NNN formatted time-prefixed ID.</p>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-nanouid">-</span>
+            <button class="copy-btn" onclick="copyValue('out-nanouid')">Copy</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">MicroUid()</span>
+              <span class="meta-tag" id="tag-microuid">22 Chars</span>
+            </div>
+            <p class="card-desc">YYYYMMDD-HHMMSS-MMMMMM recommended for general usage.</p>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-microuid">-</span>
+            <button class="copy-btn" onclick="copyValue('out-microuid')">Copy</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">SecUid()</span>
+              <span class="meta-tag" id="tag-secuid">15 Chars</span>
+            </div>
+            <p class="card-desc">YYYYMMDD-HHMMSS UTC timestamp ID to second precision.</p>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-secuid">-</span>
+            <button class="copy-btn" onclick="copyValue('out-secuid')">Copy</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Standard UUIDs</h2>
+      <div class="grid">
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">Uuid() / UuidV4()</span>
+              <span class="meta-tag" id="tag-uuidv4">36 Chars</span>
+            </div>
+            <p class="card-desc">Cryptographically strong random UUID v4.</p>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-uuidv4">-</span>
+            <button class="copy-btn" onclick="copyValue('out-uuidv4')">Copy</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">UuidV1()</span>
+              <span class="meta-tag" id="tag-uuidv1">36 Chars</span>
+            </div>
+            <p class="card-desc">Time-based UUID version 1.</p>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-uuidv1">-</span>
+            <button class="copy-btn" onclick="copyValue('out-uuidv1')">Copy</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">UuidV6()</span>
+              <span class="meta-tag" id="tag-uuidv6">36 Chars</span>
+            </div>
+            <p class="card-desc">Field-compatible reorder of UUID v1 for DB indexing.</p>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-uuidv6">-</span>
+            <button class="copy-btn" onclick="copyValue('out-uuidv6')">Copy</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">UuidV7()</span>
+              <span class="meta-tag" id="tag-uuidv7">36 Chars</span>
+            </div>
+            <p class="card-desc">Unix Epoch time-based UUID version 7.</p>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-uuidv7">-</span>
+            <button class="copy-btn" onclick="copyValue('out-uuidv7')">Copy</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Unix Timestamps</h2>
+      <div class="grid">
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">Timestamp()</span>
+              <span class="meta-tag">10 Chars</span>
+            </div>
+            <p class="card-desc">Unix timestamp in seconds.</p>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-timestamp">-</span>
+            <button class="copy-btn" onclick="copyValue('out-timestamp')">Copy</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">TimestampMicro()</span>
+              <span class="meta-tag">16 Chars</span>
+            </div>
+            <p class="card-desc">Unix timestamp in microseconds.</p>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-timestamp-micro">-</span>
+            <button class="copy-btn" onclick="copyValue('out-timestamp-micro')">Copy</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">TimestampNano()</span>
+              <span class="meta-tag">19 Chars</span>
+            </div>
+            <p class="card-desc">Unix timestamp in nanoseconds.</p>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-timestamp-nano">-</span>
+            <button class="copy-btn" onclick="copyValue('out-timestamp-nano')">Copy</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Interactive ID Shortener</h2>
+      <div class="shortener-section">
+        <p style="margin-bottom: 1rem; color: var(--text-muted);">Shorten numeric IDs (such as HumanUid or MicroUid) into compact representations using custom base encodings:</p>
+        <div class="input-group">
+          <input type="text" id="shorten-input" value="20261017055949471494" placeholder="Enter numeric ID string...">
+          <button class="btn btn-secondary" id="random-shorten-input-btn">Use Current MicroUid</button>
+        </div>
+
+        <div class="shortener-grid" id="shortener-results">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <p>Created for <a href="https://github.com/dracory/uid" target="_blank">github.com/dracory/uid</a> • Distributed under the Open Source License.</p>
+    </footer>
+  </div>
+
+  <script>
+    // Crockford Base32 alphabet
+    const CROCKFORD_ALPHABET = "0123456789abcdefghjkmnpqrstvwxyz";
+    const SAFE_BASE16_ALPHABET = "0123456789bcdfgh";
+    const HEX_ALPHABET = "0123456789abcdef";
+
+    let counter = 0;
+
+    function getMicroTimeWithCounter() {
+      const nowMicro = BigInt(Date.now()) * 1000n + BigInt(Math.floor(Math.random() * 1000));
+      counter = (counter + 1) & 0xF;
+      return (nowMicro << 4n) | BigInt(counter);
+    }
+
+    function encodeBase(val, alphabet) {
+      const base = BigInt(alphabet.length);
+      if (val === 0n) return alphabet[0];
+      let res = "";
+      while (val > 0n) {
+        const rem = Number(val % base);
+        res = alphabet[rem] + res;
+        val = val / base;
+      }
+      return res;
+    }
+
+    function generateShortID() {
+      const val = getMicroTimeWithCounter();
+      return encodeBase(val, CROCKFORD_ALPHABET).padStart(11, '0');
+    }
+
+    function generateSafeShortID() {
+      const val = getMicroTimeWithCounter();
+      return encodeBase(val, SAFE_BASE16_ALPHABET).padStart(14, '0');
+    }
+
+    function generateHexShortID() {
+      const val = getMicroTimeWithCounter();
+      return encodeBase(val, HEX_ALPHABET).padStart(14, '0');
+    }
+
+    function padZero(num, size = 2) {
+      return String(num).padStart(size, '0');
+    }
+
+    function getRandomDigits(len) {
+      let res = "";
+      for (let i = 0; i < len; i++) {
+        res += Math.floor(Math.random() * 10);
+      }
+      return res;
+    }
+
+    function generateHumanUid(formatted) {
+      const now = new Date();
+      const datePart = now.getUTCFullYear().toString() +
+        padZero(now.getUTCMonth() + 1) +
+        padZero(now.getUTCDate()) +
+        padZero(now.getUTCHours()) +
+        padZero(now.getUTCMinutes()) +
+        padZero(now.getUTCSeconds()) +
+        padZero(now.getUTCMilliseconds(), 3) + "0000"; // 21 digits
+      const randPart = getRandomDigits(11); // total 32 digits
+      const raw = (datePart + randPart).substring(0, 32);
+
+      if (formatted) {
+        return raw.slice(0, 8) + "-" + raw.slice(8, 12) + "-" + raw.slice(12, 16) + "-" + raw.slice(16, 32);
+      }
+      return raw;
+    }
+
+    function generateNanoUid(formatted) {
+      const now = new Date();
+      const datePart = now.getUTCFullYear().toString() +
+        padZero(now.getUTCMonth() + 1) +
+        padZero(now.getUTCDate()) +
+        padZero(now.getUTCHours()) +
+        padZero(now.getUTCMinutes()) +
+        padZero(now.getUTCSeconds()) +
+        padZero(now.getUTCMilliseconds(), 3) + "000"; // 20 digits
+      const randPart = getRandomDigits(3);
+      const raw = (datePart + randPart).substring(0, 23);
+
+      if (formatted) {
+        return raw.slice(0, 8) + "-" + raw.slice(8, 14) + "-" + raw.slice(14, 20) + "-" + raw.slice(20, 23);
+      }
+      return raw;
+    }
+
+    function generateMicroUid(formatted) {
+      const now = new Date();
+      const datePart = now.getUTCFullYear().toString() +
+        padZero(now.getUTCMonth() + 1) +
+        padZero(now.getUTCDate()) +
+        padZero(now.getUTCHours()) +
+        padZero(now.getUTCMinutes()) +
+        padZero(now.getUTCSeconds()) +
+        padZero(now.getUTCMilliseconds(), 3) + "000"; // 20 digits
+      const raw = datePart.substring(0, 20);
+
+      if (formatted) {
+        return raw.slice(0, 8) + "-" + raw.slice(8, 14) + "-" + raw.slice(14, 20);
+      }
+      return raw;
+    }
+
+    function generateSecUid(formatted) {
+      const now = new Date();
+      const raw = now.getUTCFullYear().toString() +
+        padZero(now.getUTCMonth() + 1) +
+        padZero(now.getUTCDate()) +
+        padZero(now.getUTCHours()) +
+        padZero(now.getUTCMinutes()) +
+        padZero(now.getUTCSeconds()); // 14 digits
+
+      if (formatted) {
+        return raw.slice(0, 8) + "-" + raw.slice(8, 14);
+      }
+      return raw;
+    }
+
+    function generateUuidV4(formatted) {
+      const hex = Array.from(crypto.getRandomValues(new Uint8Array(16)))
+        .map((b, i) => {
+          if (i === 6) b = (b & 0x0f) | 0x40; // v4
+          if (i === 8) b = (b & 0x3f) | 0x80; // variant
+          return padZero(b.toString(16), 2);
+        }).join('');
+
+      if (formatted) {
+        return hex.slice(0, 8) + "-" + hex.slice(8, 12) + "-" + hex.slice(12, 16) + "-" + hex.slice(16, 20) + "-" + hex.slice(20);
+      }
+      return hex;
+    }
+
+    function generateUuidV1(formatted) {
+      const hex = generateUuidV4(false).slice(0, 28) + "1000"; // representation mockup
+      if (formatted) {
+        return hex.slice(0, 8) + "-" + hex.slice(8, 12) + "-1" + hex.slice(13, 16) + "-" + hex.slice(16, 20) + "-" + hex.slice(20);
+      }
+      return hex;
+    }
+
+    function generateUuidV6(formatted) {
+      const hex = generateUuidV4(false);
+      const v6Hex = hex.slice(0, 12) + "6" + hex.slice(13);
+      if (formatted) {
+        return v6Hex.slice(0, 8) + "-" + v6Hex.slice(8, 12) + "-" + v6Hex.slice(12, 16) + "-" + v6Hex.slice(16, 20) + "-" + v6Hex.slice(20);
+      }
+      return v6Hex;
+    }
+
+    function generateUuidV7(formatted) {
+      const ms = Date.now();
+      const msHex = padZero(ms.toString(16), 12);
+      const randHex = Array.from(crypto.getRandomValues(new Uint8Array(10)))
+        .map(b => padZero(b.toString(16), 2)).join('');
+      const combined = (msHex + "7" + randHex.slice(1)).slice(0, 32);
+
+      if (formatted) {
+        return combined.slice(0, 8) + "-" + combined.slice(8, 12) + "-" + combined.slice(12, 16) + "-" + combined.slice(16, 20) + "-" + combined.slice(20);
+      }
+      return combined;
+    }
+
+    // Number shortening encodings
+    const BASE16 = "0123456789abcdef";
+    const BASE32 = "abcdefghijklmnopqrstuvwxyz234567";
+    const CROCKFORD = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+    const BASE36 = "0123456789abcdefghijklmnopqrstuvwxyz";
+    const BASE58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+    const BASE62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    const BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+    const ZBASE32 = "ybndrfg8ejkmcpqxot1uwisza3456789";
+
+    function shortenNumber(strVal, alphabet) {
+      try {
+        let val = BigInt(strVal);
+        if (val === 0n) return alphabet[0];
+        const base = BigInt(alphabet.length);
+        let res = "";
+        while (val > 0n) {
+          const rem = Number(val % base);
+          res = alphabet[rem] + res;
+          val = val / base;
+        }
+        return res;
+      } catch (e) {
+        return "Invalid input";
+      }
+    }
+
+    function copyValue(elementId) {
+      const el = document.getElementById(elementId);
+      if (!el) return;
+      navigator.clipboard.writeText(el.innerText);
+      const originalText = el.innerText;
+      el.style.color = "#38bdf8";
+      setTimeout(() => {
+        el.style.color = "var(--success-color)";
+      }, 300);
+    }
+
+    function updateAll() {
+      const formatted = document.getElementById("format-toggle").checked;
+
+      document.getElementById("out-shortid").innerText = generateShortID();
+      document.getElementById("out-safeshortid").innerText = generateSafeShortID();
+      document.getElementById("out-hexshortid").innerText = generateHexShortID();
+
+      const h = generateHumanUid(formatted);
+      document.getElementById("out-humanuid").innerText = h;
+      document.getElementById("tag-humanuid").innerText = h.length + " Chars";
+
+      const n = generateNanoUid(formatted);
+      document.getElementById("out-nanouid").innerText = n;
+      document.getElementById("tag-nanouid").innerText = n.length + " Chars";
+
+      const m = generateMicroUid(formatted);
+      document.getElementById("out-microuid").innerText = m;
+      document.getElementById("tag-microuid").innerText = m.length + " Chars";
+
+      const s = generateSecUid(formatted);
+      document.getElementById("out-secuid").innerText = s;
+      document.getElementById("tag-secuid").innerText = s.length + " Chars";
+
+      const u4 = generateUuidV4(formatted);
+      document.getElementById("out-uuidv4").innerText = u4;
+      document.getElementById("tag-uuidv4").innerText = u4.length + " Chars";
+
+      const u1 = generateUuidV1(formatted);
+      document.getElementById("out-uuidv1").innerText = u1;
+      document.getElementById("tag-uuidv1").innerText = u1.length + " Chars";
+
+      const u6 = generateUuidV6(formatted);
+      document.getElementById("out-uuidv6").innerText = u6;
+      document.getElementById("tag-uuidv6").innerText = u6.length + " Chars";
+
+      const u7 = generateUuidV7(formatted);
+      document.getElementById("out-uuidv7").innerText = u7;
+      document.getElementById("tag-uuidv7").innerText = u7.length + " Chars";
+
+      const nowSec = Math.floor(Date.now() / 1000).toString();
+      const nowMicro = (BigInt(Date.now()) * 1000n).toString();
+      const nowNano = (BigInt(Date.now()) * 1000000n).toString();
+
+      document.getElementById("out-timestamp").innerText = nowSec;
+      document.getElementById("out-timestamp-micro").innerText = nowMicro;
+      document.getElementById("out-timestamp-nano").innerText = nowNano;
+
+      updateShortenerResults();
+    }
+
+    function updateShortenerResults() {
+      const inputVal = document.getElementById("shorten-input").value.trim();
+      const resultsContainer = document.getElementById("shortener-results");
+
+      const encodings = [
+        { name: "Base16", alphabet: BASE16 },
+        { name: "Base32", alphabet: BASE32 },
+        { name: "Crockford", alphabet: CROCKFORD },
+        { name: "z-base-32", alphabet: ZBASE32 },
+        { name: "Base36", alphabet: BASE36 },
+        { name: "Base58", alphabet: BASE58 },
+        { name: "Base62", alphabet: BASE62 },
+        { name: "Base64", alphabet: BASE64 }
+      ];
+
+      resultsContainer.innerHTML = encodings.map(enc => {
+        const shortVal = shortenNumber(inputVal, enc.alphabet);
+        return `
+          <div class="card" style="padding: 0.9rem;">
+            <div class="card-header" style="margin-bottom: 0.4rem;">
+              <span class="card-title" style="font-size: 0.95rem;">${enc.name}</span>
+              <span class="meta-tag">${shortVal.length} Chars</span>
+            </div>
+            <div class="output-box" style="padding: 0.5rem;">
+              <span class="output-value" style="font-size: 0.85rem;">${shortVal}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    document.getElementById("generate-all-btn").addEventListener("click", updateAll);
+    document.getElementById("format-toggle").addEventListener("change", updateAll);
+    document.getElementById("shorten-input").addEventListener("input", updateShortenerResults);
+    document.getElementById("random-shorten-input-btn").addEventListener("click", () => {
+      document.getElementById("shorten-input").value = generateMicroUid(false);
+      updateShortenerResults();
+    });
+
+    // Initial render
+    updateAll();
+  </script>
+</body>
+</html>
