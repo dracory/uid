@@ -352,6 +352,163 @@
           </div>
         </div>
       </div>
+
+      <h3 style="font-size: 1.1rem; color: var(--text-muted); margin: 1.5rem 0 1rem 0;">Fixed-Width Precision Short IDs</h3>
+      <div class="grid">
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">ShortIDSec() / Safe / Hex</span>
+              <span class="meta-tag">8 / 10 Chars</span>
+            </div>
+            <p class="card-desc">Second precision (YYMMDDHHMMSS) short IDs.</p>
+          </div>
+          <div class="output-box" style="margin-bottom: 0.3rem;">
+            <span class="output-value" id="out-shortid-sec">-</span>
+            <button class="copy-btn" onclick="copyValue('out-shortid-sec')">Copy Base32</button>
+          </div>
+          <div class="output-box" style="margin-bottom: 0.3rem;">
+            <span class="output-value" id="out-safeshortid-sec">-</span>
+            <button class="copy-btn" onclick="copyValue('out-safeshortid-sec')">Copy Safe</button>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-hexshortid-sec">-</span>
+            <button class="copy-btn" onclick="copyValue('out-hexshortid-sec')">Copy Hex</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">ShortIDMin() / Safe / Hex</span>
+              <span class="meta-tag">7 / 9 Chars</span>
+            </div>
+            <p class="card-desc">Minute precision (YYMMDDHHMM) short IDs.</p>
+          </div>
+          <div class="output-box" style="margin-bottom: 0.3rem;">
+            <span class="output-value" id="out-shortid-min">-</span>
+            <button class="copy-btn" onclick="copyValue('out-shortid-min')">Copy Base32</button>
+          </div>
+          <div class="output-box" style="margin-bottom: 0.3rem;">
+            <span class="output-value" id="out-safeshortid-min">-</span>
+            <button class="copy-btn" onclick="copyValue('out-safeshortid-min')">Copy Safe</button>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-hexshortid-min">-</span>
+            <button class="copy-btn" onclick="copyValue('out-hexshortid-min')">Copy Hex</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">ShortIDHour() / Safe / Hex</span>
+              <span class="meta-tag">6 / 7 Chars</span>
+            </div>
+            <p class="card-desc">Hour precision (YYMMDDHH) short IDs.</p>
+          </div>
+          <div class="output-box" style="margin-bottom: 0.3rem;">
+            <span class="output-value" id="out-shortid-hour">-</span>
+            <button class="copy-btn" onclick="copyValue('out-shortid-hour')">Copy Base32</button>
+          </div>
+          <div class="output-box" style="margin-bottom: 0.3rem;">
+            <span class="output-value" id="out-safeshortid-hour">-</span>
+            <button class="copy-btn" onclick="copyValue('out-safeshortid-hour')">Copy Safe</button>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-hexshortid-hour">-</span>
+            <button class="copy-btn" onclick="copyValue('out-hexshortid-hour')">Copy Hex</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">ShortIDDay() / Safe / Hex</span>
+              <span class="meta-tag">4 / 5 Chars</span>
+            </div>
+            <p class="card-desc">Day precision (YYMMDD) short IDs.</p>
+          </div>
+          <div class="output-box" style="margin-bottom: 0.3rem;">
+            <span class="output-value" id="out-shortid-day">-</span>
+            <button class="copy-btn" onclick="copyValue('out-shortid-day')">Copy Base32</button>
+          </div>
+          <div class="output-box" style="margin-bottom: 0.3rem;">
+            <span class="output-value" id="out-safeshortid-day">-</span>
+            <button class="copy-btn" onclick="copyValue('out-safeshortid-day')">Copy Safe</button>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-hexshortid-day">-</span>
+            <button class="copy-btn" onclick="copyValue('out-hexshortid-day')">Copy Hex</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">ShortIDWeek() / Safe / Hex</span>
+              <span class="meta-tag">3 / 4 Chars</span>
+            </div>
+            <p class="card-desc">ISO Week precision (YYWW) short IDs.</p>
+          </div>
+          <div class="output-box" style="margin-bottom: 0.3rem;">
+            <span class="output-value" id="out-shortid-week">-</span>
+            <button class="copy-btn" onclick="copyValue('out-shortid-week')">Copy Base32</button>
+          </div>
+          <div class="output-box" style="margin-bottom: 0.3rem;">
+            <span class="output-value" id="out-safeshortid-week">-</span>
+            <button class="copy-btn" onclick="copyValue('out-safeshortid-week')">Copy Safe</button>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-hexshortid-week">-</span>
+            <button class="copy-btn" onclick="copyValue('out-hexshortid-week')">Copy Hex</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">ShortIDMonth() / Safe / Hex</span>
+              <span class="meta-tag">3 / 4 Chars</span>
+            </div>
+            <p class="card-desc">Month precision (YYMM) short IDs.</p>
+          </div>
+          <div class="output-box" style="margin-bottom: 0.3rem;">
+            <span class="output-value" id="out-shortid-month">-</span>
+            <button class="copy-btn" onclick="copyValue('out-shortid-month')">Copy Base32</button>
+          </div>
+          <div class="output-box" style="margin-bottom: 0.3rem;">
+            <span class="output-value" id="out-safeshortid-month">-</span>
+            <button class="copy-btn" onclick="copyValue('out-safeshortid-month')">Copy Safe</button>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-hexshortid-month">-</span>
+            <button class="copy-btn" onclick="copyValue('out-hexshortid-month')">Copy Hex</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">ShortIDYear() / Safe / Hex</span>
+              <span class="meta-tag">2 / 2 Chars</span>
+            </div>
+            <p class="card-desc">Year precision (YY) short IDs.</p>
+          </div>
+          <div class="output-box" style="margin-bottom: 0.3rem;">
+            <span class="output-value" id="out-shortid-year">-</span>
+            <button class="copy-btn" onclick="copyValue('out-shortid-year')">Copy Base32</button>
+          </div>
+          <div class="output-box" style="margin-bottom: 0.3rem;">
+            <span class="output-value" id="out-safeshortid-year">-</span>
+            <button class="copy-btn" onclick="copyValue('out-safeshortid-year')">Copy Safe</button>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-hexshortid-year">-</span>
+            <button class="copy-btn" onclick="copyValue('out-hexshortid-year')">Copy Hex</button>
+          </div>
+        </div>
+      </div>
     </section>
 
     <section>
@@ -410,6 +567,76 @@
           <div class="output-box">
             <span class="output-value" id="out-secuid">-</span>
             <button class="copy-btn" onclick="copyValue('out-secuid')">Copy</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">MinUid()</span>
+              <span class="meta-tag" id="tag-minuid">13 Chars</span>
+            </div>
+            <p class="card-desc">YYYYMMDD-HHMM UTC timestamp ID to minute precision.</p>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-minuid">-</span>
+            <button class="copy-btn" onclick="copyValue('out-minuid')">Copy</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">HourUid()</span>
+              <span class="meta-tag" id="tag-houruid">11 Chars</span>
+            </div>
+            <p class="card-desc">YYYYMMDD-HH UTC timestamp ID to hour precision.</p>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-houruid">-</span>
+            <button class="copy-btn" onclick="copyValue('out-houruid')">Copy</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">DayUid()</span>
+              <span class="meta-tag" id="tag-dayuid">10 Chars</span>
+            </div>
+            <p class="card-desc">YYYY-MM-DD UTC date ID to day precision.</p>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-dayuid">-</span>
+            <button class="copy-btn" onclick="copyValue('out-dayuid')">Copy</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">WeekUid()</span>
+              <span class="meta-tag" id="tag-weekuid">7 Chars</span>
+            </div>
+            <p class="card-desc">YYYY-WW UTC date ID to ISO week precision.</p>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-weekuid">-</span>
+            <button class="copy-btn" onclick="copyValue('out-weekuid')">Copy</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="card-header">
+              <span class="card-title">MonthUid()</span>
+              <span class="meta-tag" id="tag-monthuid">7 Chars</span>
+            </div>
+            <p class="card-desc">YYYY-MM UTC date ID to month precision.</p>
+          </div>
+          <div class="output-box">
+            <span class="output-value" id="out-monthuid">-</span>
+            <button class="copy-btn" onclick="copyValue('out-monthuid')">Copy</button>
           </div>
         </div>
       </div>
