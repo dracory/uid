@@ -2,6 +2,7 @@ package uid
 
 import (
 	"crypto/rand"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -32,6 +33,112 @@ func HumanUid(formatted ...bool) string {
 	withHyphens := len(formatted) > 0 && formatted[0]
 	if withHyphens {
 		return formatWithHyphens(s, []int{8, 4, 4, 16})
+	}
+	return s
+}
+
+// MinUid generates a 12-character time-based ID to minute precision.
+//
+// Format: YYYYMMDDHHMM
+//
+// Example (unformatted): 202508311511 (length: 12)
+// Example (formatted): 20250831-1511 (length: 13)
+//
+// Parameters:
+// - formatted: when true, include hyphens in groups 8-4 (length becomes 13)
+//
+// Returns:
+// - A 12-character numeric string representing UTC date/time to the minute
+func MinUid(formatted ...bool) string {
+	s := time.Now().UTC().Format("200601021504")
+	withHyphens := len(formatted) > 0 && formatted[0]
+	if withHyphens {
+		return formatWithHyphens(s, []int{8, 4})
+	}
+	return s
+}
+
+// HourUid generates a 10-character time-based ID to hour precision.
+//
+// Format: YYYYMMDDHH
+//
+// Example (unformatted): 2025083115 (length: 10)
+// Example (formatted): 20250831-15 (length: 11)
+//
+// Parameters:
+// - formatted: when true, include hyphens in groups 8-2 (length becomes 11)
+//
+// Returns:
+// - A 10-character numeric string representing UTC date/time to the hour
+func HourUid(formatted ...bool) string {
+	s := time.Now().UTC().Format("2006010215")
+	withHyphens := len(formatted) > 0 && formatted[0]
+	if withHyphens {
+		return formatWithHyphens(s, []int{8, 2})
+	}
+	return s
+}
+
+// DayUid generates an 8-character time-based ID to day precision.
+//
+// Format: YYYYMMDD
+//
+// Example (unformatted): 20250831 (length: 8)
+// Example (formatted): 2025-08-31 (length: 10)
+//
+// Parameters:
+// - formatted: when true, include hyphens in groups 4-2-2 (length becomes 10)
+//
+// Returns:
+// - An 8-character numeric string representing UTC date to the day
+func DayUid(formatted ...bool) string {
+	s := time.Now().UTC().Format("20060102")
+	withHyphens := len(formatted) > 0 && formatted[0]
+	if withHyphens {
+		return formatWithHyphens(s, []int{4, 2, 2})
+	}
+	return s
+}
+
+// WeekUid generates a 6-character time-based ID to ISO week precision.
+//
+// Format: YYYYWW
+//
+// Example (unformatted): 202535 (length: 6)
+// Example (formatted): 2025-35 (length: 7)
+//
+// Parameters:
+// - formatted: when true, include hyphens in groups 4-2 (length becomes 7)
+//
+// Returns:
+// - A 6-character numeric string representing UTC ISO year and week
+func WeekUid(formatted ...bool) string {
+	isoYear, isoWeek := time.Now().UTC().ISOWeek()
+	s := fmt.Sprintf("%04d%02d", isoYear, isoWeek)
+	withHyphens := len(formatted) > 0 && formatted[0]
+	if withHyphens {
+		return formatWithHyphens(s, []int{4, 2})
+	}
+	return s
+}
+
+// MonthUid generates a 6-character time-based ID to month precision.
+//
+// Format: YYYYMM
+//
+// Example (unformatted): 202508 (length: 6)
+// Example (formatted): 2025-08 (length: 7)
+//
+// Parameters:
+// - formatted: when true, include hyphens in groups 4-2 (length becomes 7)
+//
+// Returns:
+// - A 6-character numeric string representing UTC date to the month
+func MonthUid(formatted ...bool) string {
+	s := time.Now().UTC().Format("200601")
+	withHyphens := len(formatted) > 0 && formatted[0]
+	if withHyphens {
+		return formatWithHyphens(s, []int{4, 2})
 	}
 	return s
 }

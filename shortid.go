@@ -215,3 +215,177 @@ func ShortIDCustom(alphabet string) string {
 
 	return encodeInt64(nextShortIDValue(), alphabet)
 }
+
+// encodeFixed encodes val into exactly width digits using alphabet,
+// zero-padded on the left if necessary.
+func encodeFixed(val int64, alphabet string, width int) string {
+	base := int64(len(alphabet))
+	var buf [16]byte
+	for i := width - 1; i >= 0; i-- {
+		buf[i] = alphabet[val%base]
+		val /= base
+	}
+	return string(buf[:width])
+}
+
+func timeValSec(t time.Time) int64 {
+	y := int64(t.Year() % 100)
+	m := int64(t.Month())
+	d := int64(t.Day())
+	hh := int64(t.Hour())
+	mm := int64(t.Minute())
+	ss := int64(t.Second())
+	return y*10000000000 + m*100000000 + d*1000000 + hh*10000 + mm*100 + ss
+}
+
+func timeValMin(t time.Time) int64 {
+	y := int64(t.Year() % 100)
+	m := int64(t.Month())
+	d := int64(t.Day())
+	hh := int64(t.Hour())
+	mm := int64(t.Minute())
+	return y*100000000 + m*1000000 + d*10000 + hh*100 + mm
+}
+
+func timeValHour(t time.Time) int64 {
+	y := int64(t.Year() % 100)
+	m := int64(t.Month())
+	d := int64(t.Day())
+	hh := int64(t.Hour())
+	return y*1000000 + m*10000 + d*100 + hh
+}
+
+func timeValDay(t time.Time) int64 {
+	y := int64(t.Year() % 100)
+	m := int64(t.Month())
+	d := int64(t.Day())
+	return y*10000 + m*100 + d
+}
+
+func timeValWeek(t time.Time) int64 {
+	isoYear, isoWeek := t.ISOWeek()
+	y := int64(isoYear % 100)
+	w := int64(isoWeek)
+	return y*100 + w
+}
+
+func timeValMonth(t time.Time) int64 {
+	y := int64(t.Year() % 100)
+	m := int64(t.Month())
+	return y*100 + m
+}
+
+func timeValYear(t time.Time) int64 {
+	return int64(t.Year() % 100)
+}
+
+// Crockford Base32 precision short IDs (fixed widths)
+
+// ShortIDSec creates an 8-character Crockford Base32 short ID to second precision (YYMMDDHHMMSS).
+func ShortIDSec() string {
+	return encodeFixed(timeValSec(time.Now().UTC()), crockfordLowerAlphabet, 8)
+}
+
+// ShortIDMin creates a 7-character Crockford Base32 short ID to minute precision (YYMMDDHHMM).
+func ShortIDMin() string {
+	return encodeFixed(timeValMin(time.Now().UTC()), crockfordLowerAlphabet, 7)
+}
+
+// ShortIDHour creates a 6-character Crockford Base32 short ID to hour precision (YYMMDDHH).
+func ShortIDHour() string {
+	return encodeFixed(timeValHour(time.Now().UTC()), crockfordLowerAlphabet, 6)
+}
+
+// ShortIDDay creates a 4-character Crockford Base32 short ID to day precision (YYMMDD).
+func ShortIDDay() string {
+	return encodeFixed(timeValDay(time.Now().UTC()), crockfordLowerAlphabet, 4)
+}
+
+// ShortIDWeek creates a 3-character Crockford Base32 short ID to ISO week precision (YYWW).
+func ShortIDWeek() string {
+	return encodeFixed(timeValWeek(time.Now().UTC()), crockfordLowerAlphabet, 3)
+}
+
+// ShortIDMonth creates a 3-character Crockford Base32 short ID to month precision (YYMM).
+func ShortIDMonth() string {
+	return encodeFixed(timeValMonth(time.Now().UTC()), crockfordLowerAlphabet, 3)
+}
+
+// ShortIDYear creates a 2-character Crockford Base32 short ID to year precision (YY).
+func ShortIDYear() string {
+	return encodeFixed(timeValYear(time.Now().UTC()), crockfordLowerAlphabet, 2)
+}
+
+// Safe Base16 precision short IDs (fixed widths, vowel-free)
+
+// SafeShortIDSec creates a 10-character Safe Base16 short ID to second precision.
+func SafeShortIDSec() string {
+	return encodeFixed(timeValSec(time.Now().UTC()), safeShortAlphabet, 10)
+}
+
+// SafeShortIDMin creates a 9-character Safe Base16 short ID to minute precision.
+func SafeShortIDMin() string {
+	return encodeFixed(timeValMin(time.Now().UTC()), safeShortAlphabet, 9)
+}
+
+// SafeShortIDHour creates a 7-character Safe Base16 short ID to hour precision.
+func SafeShortIDHour() string {
+	return encodeFixed(timeValHour(time.Now().UTC()), safeShortAlphabet, 7)
+}
+
+// SafeShortIDDay creates a 5-character Safe Base16 short ID to day precision.
+func SafeShortIDDay() string {
+	return encodeFixed(timeValDay(time.Now().UTC()), safeShortAlphabet, 5)
+}
+
+// SafeShortIDWeek creates a 4-character Safe Base16 short ID to ISO week precision.
+func SafeShortIDWeek() string {
+	return encodeFixed(timeValWeek(time.Now().UTC()), safeShortAlphabet, 4)
+}
+
+// SafeShortIDMonth creates a 4-character Safe Base16 short ID to month precision.
+func SafeShortIDMonth() string {
+	return encodeFixed(timeValMonth(time.Now().UTC()), safeShortAlphabet, 4)
+}
+
+// SafeShortIDYear creates a 2-character Safe Base16 short ID to year precision.
+func SafeShortIDYear() string {
+	return encodeFixed(timeValYear(time.Now().UTC()), safeShortAlphabet, 2)
+}
+
+// Hex Base16 precision short IDs (fixed widths, lowercase hex)
+
+// HexShortIDSec creates a 10-character Hex Base16 short ID to second precision.
+func HexShortIDSec() string {
+	return encodeFixed(timeValSec(time.Now().UTC()), hexShortAlphabet, 10)
+}
+
+// HexShortIDMin creates a 9-character Hex Base16 short ID to minute precision.
+func HexShortIDMin() string {
+	return encodeFixed(timeValMin(time.Now().UTC()), hexShortAlphabet, 9)
+}
+
+// HexShortIDHour creates a 7-character Hex Base16 short ID to hour precision.
+func HexShortIDHour() string {
+	return encodeFixed(timeValHour(time.Now().UTC()), hexShortAlphabet, 7)
+}
+
+// HexShortIDDay creates a 5-character Hex Base16 short ID to day precision.
+func HexShortIDDay() string {
+	return encodeFixed(timeValDay(time.Now().UTC()), hexShortAlphabet, 5)
+}
+
+// HexShortIDWeek creates a 4-character Hex Base16 short ID to ISO week precision.
+func HexShortIDWeek() string {
+	return encodeFixed(timeValWeek(time.Now().UTC()), hexShortAlphabet, 4)
+}
+
+// HexShortIDMonth creates a 4-character Hex Base16 short ID to month precision.
+func HexShortIDMonth() string {
+	return encodeFixed(timeValMonth(time.Now().UTC()), hexShortAlphabet, 4)
+}
+
+// HexShortIDYear creates a 2-character Hex Base16 short ID to year precision.
+func HexShortIDYear() string {
+	return encodeFixed(timeValYear(time.Now().UTC()), hexShortAlphabet, 2)
+}

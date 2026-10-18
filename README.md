@@ -22,10 +22,22 @@ Below is a complete comparison of all ID generators available in this package, s
 | `SafeShortID()` | Vowel-free Base16 (ts + 4-bit counter) | **14** | N/A | `05fr88tc139r8t` |
 | `HexShortID()` | Hexadecimal (ts + 4-bit counter) | **14** | N/A | `015fa88bc139a8f` |
 | `ShortIDCustom(alphabet)` | Custom alphabet (ts + 4-bit counter) | varies | N/A | `5fr88tc139r8t` |
+| `ShortIDSec()` / `Safe` / `Hex` | Precision: Second (Base32 / Base16) | **8 / 10** | N/A | `79kb780x` / `3b66c3b01f` |
+| `ShortIDMin()` / `Safe` / `Hex` | Precision: Minute (Base32 / Base16) | **7 / 9** | N/A | `2ar3jyq` / `09581dcf7` |
+| `ShortIDHour()` / `Safe` / `Hex` | Precision: Hour (Base32 / Base16) | **6 / 7** | N/A | `0qxf7b` / `17gcdgc` |
+| `ShortIDDay()` / `Safe` / `Hex` | Precision: Day (Base32 / Base16) | **4 / 5** | N/A | `7myf` / `3f3dh` |
+| `ShortIDWeek()` / `Safe` / `Hex` | Precision: ISO Week (Base32 / Base16) | **3 / 4** | N/A | `2f7` / `09g7` |
+| `ShortIDMonth()` / `Safe` / `Hex` | Precision: Month (Base32 / Base16) | **3 / 4** | N/A | `2ec` / `09dd` |
+| `ShortIDYear()` / `Safe` / `Hex` | Precision: Year (Base32 / Base16) | **2 / 2** | N/A | `0s` / `19` |
 | `HumanUid()` | Dated digits (YYYYMMDD-HHMM-SSMM-MMMMNNNRRRRRRRRR) | **32** | **35** | `20250831151133000012345678901234` |
 | `NanoUid()` | Dated digits (YYYYMMDD-HHMMSS-MMMMMM-NNN) | **23** | **26** | `20250831151133000012345` |
 | `MicroUid()` | Dated digits (YYYYMMDD-HHMMSS-MMMMMM) | **20** | **22** | `20250831151133000012` |
 | `SecUid()` | Dated digits (YYYYMMDD-HHMMSS) | **14** | **15** | `20250831151133` |
+| `MinUid()` | Dated digits (YYYYMMDD-HHMM) | **12** | **13** | `202508311511` |
+| `HourUid()` | Dated digits (YYYYMMDD-HH) | **10** | **11** | `2025083115` |
+| `DayUid()` | Dated digits (YYYY-MM-DD) | **8** | **10** | `20250831` |
+| `WeekUid()` | Dated digits (YYYY-WW) | **6** | **7** | `202535` |
+| `MonthUid()` | Dated digits (YYYY-MM) | **6** | **7** | `202508` |
 | `Timestamp()` | Unix timestamp (seconds) | **10** | N/A | `1704524414` |
 | `TimestampMicro()`| Unix timestamp (microseconds) | **16** | N/A | `1704524414548721` |
 | `TimestampNano()` | Unix timestamp (nanoseconds) | **19** | N/A | `1704524414548721308` |
@@ -137,6 +149,7 @@ For most of the user cases a Micro UID (20 chars) should be fine. A human UID (3
     - `SafeShortID()` - 14 chars, vowel-free Base16 (`0123456789bcdfgh`), e.g. `05fh88gd139f8h`
     - `HexShortID()` - 14 chars, standard lowercase hex
     - `ShortIDCustom(alphabet)` - custom alphabet (min 2 unique ASCII chars, ascending order recommended for sortable IDs)
+    - `ShortID<Precision>()` / `SafeShortID<Precision>()` / `HexShortID<Precision>()` - fixed-width precision short IDs (`Sec`, `Min`, `Hour`, `Day`, `Week`, `Month`, `Year`)
     - `IsShortID(id)` - validates ShortID format (length + charset)
     - `NormalizeID(id)` - trims whitespace and lowercases
 
@@ -171,6 +184,10 @@ For most of the user cases a Micro UID (20 chars) should be fine. A human UID (3
     Examples:
 
     20171119084926 (with dashes: 20171119-084926)
+
+5. Digit Family UIDs (`MinUid`, `HourUid`, `DayUid`, `WeekUid`, `MonthUid`)
+
+    Format: Full 4-digit year ladder (`YYYYMMDDHHMM`, `YYYYMMDDHH`, `YYYYMMDD`, `YYYYWW`, `YYYYMM`).
 
 5. Timestamp (10 digits)
     Unit timestamp, seconds precision

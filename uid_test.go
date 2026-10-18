@@ -141,6 +141,101 @@ func TestSecUidFormatted(t *testing.T) {
 	assertHyphenPositions(t, sf, 15, []int{8})
 }
 
+func TestMinUid(t *testing.T) {
+	u := MinUid()
+	if u == "" {
+		t.Fatal("Min UID must not be empty")
+	}
+	if len(u) != 12 {
+		t.Fatalf("Min UID length must be 12 characters, got %d", len(u))
+	}
+}
+
+func TestMinUidFormatted(t *testing.T) {
+	uf := MinUid(true)
+	if uf == "" {
+		t.Fatal("Min UID (formatted) must not be empty")
+	}
+	// formatted variant: groups 8-4 => hyphen at 8; total length 13
+	assertHyphenPositions(t, uf, 13, []int{8})
+}
+
+func TestHourUid(t *testing.T) {
+	u := HourUid()
+	if u == "" {
+		t.Fatal("Hour UID must not be empty")
+	}
+	if len(u) != 10 {
+		t.Fatalf("Hour UID length must be 10 characters, got %d", len(u))
+	}
+}
+
+func TestHourUidFormatted(t *testing.T) {
+	uf := HourUid(true)
+	if uf == "" {
+		t.Fatal("Hour UID (formatted) must not be empty")
+	}
+	// formatted variant: groups 8-2 => hyphen at 8; total length 11
+	assertHyphenPositions(t, uf, 11, []int{8})
+}
+
+func TestDayUid(t *testing.T) {
+	u := DayUid()
+	if u == "" {
+		t.Fatal("Day UID must not be empty")
+	}
+	if len(u) != 8 {
+		t.Fatalf("Day UID length must be 8 characters, got %d", len(u))
+	}
+}
+
+func TestDayUidFormatted(t *testing.T) {
+	uf := DayUid(true)
+	if uf == "" {
+		t.Fatal("Day UID (formatted) must not be empty")
+	}
+	// formatted variant: groups 4-2-2 => hyphens at 4, 7; total length 10
+	assertHyphenPositions(t, uf, 10, []int{4, 7})
+}
+
+func TestWeekUid(t *testing.T) {
+	u := WeekUid()
+	if u == "" {
+		t.Fatal("Week UID must not be empty")
+	}
+	if len(u) != 6 {
+		t.Fatalf("Week UID length must be 6 characters, got %d", len(u))
+	}
+}
+
+func TestWeekUidFormatted(t *testing.T) {
+	uf := WeekUid(true)
+	if uf == "" {
+		t.Fatal("Week UID (formatted) must not be empty")
+	}
+	// formatted variant: groups 4-2 => hyphen at 4; total length 7
+	assertHyphenPositions(t, uf, 7, []int{4})
+}
+
+func TestMonthUid(t *testing.T) {
+	u := MonthUid()
+	if u == "" {
+		t.Fatal("Month UID must not be empty")
+	}
+	if len(u) != 6 {
+		t.Fatalf("Month UID length must be 6 characters, got %d", len(u))
+	}
+}
+
+func TestMonthUidFormatted(t *testing.T) {
+	uf := MonthUid(true)
+	if uf == "" {
+		t.Fatal("Month UID (formatted) must not be empty")
+	}
+	// formatted variant: groups 4-2 => hyphen at 4; total length 7
+	assertHyphenPositions(t, uf, 7, []int{4})
+}
+
 func TestTimestamp(t *testing.T) {
 	ts1 := Timestamp()
 	ts2 := Timestamp()
