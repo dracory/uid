@@ -104,6 +104,97 @@ func TestShortenUnshorten(t *testing.T) {
 	}
 }
 
+func TestCustomAlphabet(t *testing.T) {
+	tc := "12345678901234567890"
+
+	custom16 := "FEDCBA9876543210"
+	short16, err := ShortenBase16(tc, custom16)
+	if err != nil {
+		t.Fatalf("ShortenBase16 custom alphabet failed: %v", err)
+	}
+	unshort16, err := UnshortenBase16(short16, custom16)
+	if err != nil || unshort16 != tc {
+		t.Errorf("UnshortenBase16 custom alphabet failed: got %s, want %s, err %v", unshort16, tc, err)
+	}
+
+	custom32 := "0123456789ABCDEFGHIJKLMNOPQRSTUV"
+	short32, err := ShortenBase32(tc, custom32)
+	if err != nil {
+		t.Fatalf("ShortenBase32 custom alphabet failed: %v", err)
+	}
+	unshort32, err := UnshortenBase32(short32, custom32)
+	if err != nil || unshort32 != tc {
+		t.Errorf("UnshortenBase32 custom alphabet failed: got %s, want %s, err %v", unshort32, tc, err)
+	}
+
+	customCrockford := "0123456789abcdefghjkmnpqrstvwxyz"
+	shortCrock, err := ShortenCrockford(tc, customCrockford)
+	if err != nil {
+		t.Fatalf("ShortenCrockford custom alphabet failed: %v", err)
+	}
+	unshortCrock, err := UnshortenCrockford(shortCrock, customCrockford)
+	if err != nil || unshortCrock != tc {
+		t.Errorf("UnshortenCrockford custom alphabet failed: got %s, want %s, err %v", unshortCrock, tc, err)
+	}
+
+	custom64 := "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_"
+	short64, err := ShortenBase64(tc, custom64)
+	if err != nil {
+		t.Fatalf("ShortenBase64 custom alphabet failed: %v", err)
+	}
+	unshort64, err := UnshortenBase64(short64, custom64)
+	if err != nil || unshort64 != tc {
+		t.Errorf("UnshortenBase64 custom alphabet failed: got %s, want %s, err %v", unshort64, tc, err)
+	}
+
+	custom36 := "zyxwvutsrqponmlkjihgfedcba9876543210"
+	short36, err := ShortenBase36(tc, custom36)
+	if err != nil {
+		t.Fatalf("ShortenBase36 custom alphabet failed: %v", err)
+	}
+	unshort36, err := UnshortenBase36(short36, custom36)
+	if err != nil || unshort36 != tc {
+		t.Errorf("UnshortenBase36 custom alphabet failed: got %s, want %s, err %v", unshort36, tc, err)
+	}
+
+	custom58 := "zyxwvutsrqponmlkjihgfedcbaZYXWVUTSRQPONMLKJIHGFEDCBA9876543210"[:58]
+	short58, err := ShortenBase58(tc, custom58)
+	if err != nil {
+		t.Fatalf("ShortenBase58 custom alphabet failed: %v", err)
+	}
+	unshort58, err := UnshortenBase58(short58, custom58)
+	if err != nil || unshort58 != tc {
+		t.Errorf("UnshortenBase58 custom alphabet failed: got %s, want %s, err %v", unshort58, tc, err)
+	}
+
+	custom62 := "zyxwvutsrqponmlkjihgfedcbaZYXWVUTSRQPONMLKJIHGFEDCBA9876543210"[:62]
+	short62, err := ShortenBase62(tc, custom62)
+	if err != nil {
+		t.Fatalf("ShortenBase62 custom alphabet failed: %v", err)
+	}
+	unshort62, err := UnshortenBase62(short62, custom62)
+	if err != nil || unshort62 != tc {
+		t.Errorf("UnshortenBase62 custom alphabet failed: got %s, want %s, err %v", unshort62, tc, err)
+	}
+
+	customZ32 := "0123456789abcdefghijklmnopqrstuv"
+	shortZ32, err := ShortenZBase32(tc, customZ32)
+	if err != nil {
+		t.Fatalf("ShortenZBase32 custom alphabet failed: %v", err)
+	}
+	unshortZ32, err := UnshortenZBase32(shortZ32, customZ32)
+	if err != nil || unshortZ32 != tc {
+		t.Errorf("UnshortenZBase32 custom alphabet failed: got %s, want %s, err %v", unshortZ32, tc, err)
+	}
+
+	// Test passing empty string as optional alphabet (should fallback to default)
+	shortDefault, _ := ShortenBase16(tc)
+	shortEmpty, _ := ShortenBase16(tc, "")
+	if shortDefault != shortEmpty {
+		t.Errorf("Empty custom alphabet fallback failed: got %s, want %s", shortEmpty, shortDefault)
+	}
+}
+
 func TestCrockfordNormalization(t *testing.T) {
 	id := "12345678901234567890"
 	short, _ := ShortenCrockford(id)

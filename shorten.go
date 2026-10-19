@@ -22,6 +22,13 @@ const (
 	alphabetZ32       = "ybndrfg8ejkmcpqxot1uwisza345h769"
 )
 
+func getAlphabet(defaultAlphabet string, alphabet []string) string {
+	if len(alphabet) > 0 && alphabet[0] != "" {
+		return alphabet[0]
+	}
+	return defaultAlphabet
+}
+
 // ShortenBase16 converts a numeric string ID to a base16 (hexadecimal) string.
 //
 // Benefits:
@@ -34,12 +41,13 @@ const (
 // Example: ShortenBase16("1234567890") -> "499602d2"
 //
 // Parameters:
-// - id: A numeric string represention of a positive integer.
+// - id: A numeric string representation of a positive integer.
+// - alphabet: Optional custom alphabet to override default base16 alphabet.
 //
 // Returns:
-// - A lowercase hexadecimal string.
-func ShortenBase16(id string) (string, error) {
-	return encodeBase(id, alphabet16)
+// - A base16 encoded string.
+func ShortenBase16(id string, alphabet ...string) (string, error) {
+	return encodeBase(id, getAlphabet(alphabet16, alphabet))
 }
 
 // UnshortenBase16 converts a base16 (hexadecimal) string back to its original numeric string ID.
@@ -48,11 +56,12 @@ func ShortenBase16(id string) (string, error) {
 //
 // Parameters:
 // - s: A hexadecimal string.
+// - alphabet: Optional custom alphabet to override default base16 alphabet.
 //
 // Returns:
 // - The original numeric string ID, or an error if invalid characters are encountered.
-func UnshortenBase16(s string) (string, error) {
-	return decodeBase(s, alphabet16)
+func UnshortenBase16(s string, alphabet ...string) (string, error) {
+	return decodeBase(s, getAlphabet(alphabet16, alphabet))
 }
 
 // ShortenBase32 converts a numeric string ID to a base32 string (RFC 4648).
@@ -68,12 +77,13 @@ func UnshortenBase16(s string) (string, error) {
 // Example: ShortenBase32("1234567890") -> "gnm6fsq"
 //
 // Parameters:
-// - id: A numeric string represention of a positive integer.
+// - id: A numeric string representation of a positive integer.
+// - alphabet: Optional custom alphabet to override default base32 alphabet.
 //
 // Returns:
-// - A lowercase base32 string.
-func ShortenBase32(id string) (string, error) {
-	return encodeBase(id, alphabet32)
+// - A base32 string.
+func ShortenBase32(id string, alphabet ...string) (string, error) {
+	return encodeBase(id, getAlphabet(alphabet32, alphabet))
 }
 
 // UnshortenBase32 converts a base32 string back to its original numeric string ID.
@@ -81,12 +91,17 @@ func ShortenBase32(id string) (string, error) {
 // Example: UnshortenBase32("gnm6fsq") -> "1234567890"
 //
 // Parameters:
-// - s: A base32 string (case-insensitive).
+// - s: A base32 string (case-insensitive when using default alphabet).
+// - alphabet: Optional custom alphabet to override default base32 alphabet.
 //
 // Returns:
 // - The original numeric string ID, or an error if invalid characters are encountered.
-func UnshortenBase32(s string) (string, error) {
-	return decodeBase(strings.ToLower(s), alphabet32)
+func UnshortenBase32(s string, alphabet ...string) (string, error) {
+	alph := getAlphabet(alphabet32, alphabet)
+	if len(alphabet) == 0 || alphabet[0] == "" {
+		s = strings.ToLower(s)
+	}
+	return decodeBase(s, alph)
 }
 
 // ShortenCrockford converts a numeric string ID to a Crockford Base32 string.
@@ -101,34 +116,38 @@ func UnshortenBase32(s string) (string, error) {
 // Example: ShortenCrockford("1234567890") -> "14MM0M"
 //
 // Parameters:
-// - id: A numeric string represention of a positive integer.
+// - id: A numeric string representation of a positive integer.
+// - alphabet: Optional custom alphabet to override default Crockford alphabet.
 //
 // Returns:
-// - An uppercase Crockford Base32 string.
-func ShortenCrockford(id string) (string, error) {
-	return encodeBase(id, alphabetCrockford)
+// - A Crockford Base32 string.
+func ShortenCrockford(id string, alphabet ...string) (string, error) {
+	return encodeBase(id, getAlphabet(alphabetCrockford, alphabet))
 }
 
 // UnshortenCrockford converts a Crockford Base32 string back to its original numeric string ID.
 //
 // Features:
-// - Supports normalization: converts to uppercase, removes hyphens.
-// - Maps visually similar characters (O -> 0, I/L -> 1) to reduce errors.
+// - Supports normalization (converts to uppercase, removes hyphens, maps visually similar characters) when using default alphabet.
 //
 // Example: UnshortenCrockford("14MM0M") -> "1234567890"
 //
 // Parameters:
 // - s: A Crockford Base32 string.
+// - alphabet: Optional custom alphabet to override default Crockford alphabet.
 //
 // Returns:
 // - The original numeric string ID, or an error if invalid characters are encountered.
-func UnshortenCrockford(s string) (string, error) {
-	s = strings.ToUpper(s)
-	s = strings.ReplaceAll(s, "-", "")
-	s = strings.ReplaceAll(s, "O", "0")
-	s = strings.ReplaceAll(s, "I", "1")
-	s = strings.ReplaceAll(s, "L", "1")
-	return decodeBase(s, alphabetCrockford)
+func UnshortenCrockford(s string, alphabet ...string) (string, error) {
+	alph := getAlphabet(alphabetCrockford, alphabet)
+	if len(alphabet) == 0 || alphabet[0] == "" {
+		s = strings.ToUpper(s)
+		s = strings.ReplaceAll(s, "-", "")
+		s = strings.ReplaceAll(s, "O", "0")
+		s = strings.ReplaceAll(s, "I", "1")
+		s = strings.ReplaceAll(s, "L", "1")
+	}
+	return decodeBase(s, alph)
 }
 
 // ShortenBase64 converts a numeric string ID to a URL-safe base64 string.
@@ -146,12 +165,13 @@ func UnshortenCrockford(s string) (string, error) {
 // Example: ShortenBase64("1234567890") -> "BJlg8u"
 //
 // Parameters:
-// - id: A numeric string represention of a positive integer.
+// - id: A numeric string representation of a positive integer.
+// - alphabet: Optional custom alphabet to override default base64 alphabet.
 //
 // Returns:
 // - A URL-safe base64 string.
-func ShortenBase64(id string) (string, error) {
-	return encodeBase(id, alphabet64)
+func ShortenBase64(id string, alphabet ...string) (string, error) {
+	return encodeBase(id, getAlphabet(alphabet64, alphabet))
 }
 
 // UnshortenBase64 converts a URL-safe base64 string back to its original numeric string ID.
@@ -160,11 +180,12 @@ func ShortenBase64(id string) (string, error) {
 //
 // Parameters:
 // - s: A URL-safe base64 string.
+// - alphabet: Optional custom alphabet to override default base64 alphabet.
 //
 // Returns:
 // - The original numeric string ID, or an error if invalid characters are encountered.
-func UnshortenBase64(s string) (string, error) {
-	return decodeBase(s, alphabet64)
+func UnshortenBase64(s string, alphabet ...string) (string, error) {
+	return decodeBase(s, getAlphabet(alphabet64, alphabet))
 }
 
 // ShortenBase36 converts a numeric string ID to a base36 string.
@@ -179,12 +200,13 @@ func UnshortenBase64(s string) (string, error) {
 // Example: ShortenBase36("1234567890") -> "kf12oi"
 //
 // Parameters:
-// - id: A numeric string represention of a positive integer.
+// - id: A numeric string representation of a positive integer.
+// - alphabet: Optional custom alphabet to override default base36 alphabet.
 //
 // Returns:
-// - A lowercase base36 string.
-func ShortenBase36(id string) (string, error) {
-	return encodeBase(id, alphabet36)
+// - A base36 string.
+func ShortenBase36(id string, alphabet ...string) (string, error) {
+	return encodeBase(id, getAlphabet(alphabet36, alphabet))
 }
 
 // UnshortenBase36 converts a base36 string back to its original numeric string ID.
@@ -192,12 +214,17 @@ func ShortenBase36(id string) (string, error) {
 // Example: UnshortenBase36("kf12oi") -> "1234567890"
 //
 // Parameters:
-// - s: A base36 string (case-insensitive).
+// - s: A base36 string (case-insensitive when using default alphabet).
+// - alphabet: Optional custom alphabet to override default base36 alphabet.
 //
 // Returns:
 // - The original numeric string ID, or an error if invalid characters are encountered.
-func UnshortenBase36(s string) (string, error) {
-	return decodeBase(strings.ToLower(s), alphabet36)
+func UnshortenBase36(s string, alphabet ...string) (string, error) {
+	alph := getAlphabet(alphabet36, alphabet)
+	if len(alphabet) == 0 || alphabet[0] == "" {
+		s = strings.ToLower(s)
+	}
+	return decodeBase(s, alph)
 }
 
 // ShortenBase58 converts a numeric string ID to a base58 string.
@@ -212,12 +239,13 @@ func UnshortenBase36(s string) (string, error) {
 // Example: ShortenBase58("1234567890") -> "2V6G2p"
 //
 // Parameters:
-// - id: A numeric string represention of a positive integer.
+// - id: A numeric string representation of a positive integer.
+// - alphabet: Optional custom alphabet to override default base58 alphabet.
 //
 // Returns:
-// - A base58 string (mixed case).
-func ShortenBase58(id string) (string, error) {
-	return encodeBase(id, alphabet58)
+// - A base58 string.
+func ShortenBase58(id string, alphabet ...string) (string, error) {
+	return encodeBase(id, getAlphabet(alphabet58, alphabet))
 }
 
 // UnshortenBase58 converts a base58 string back to its original numeric string ID.
@@ -226,11 +254,12 @@ func ShortenBase58(id string) (string, error) {
 //
 // Parameters:
 // - s: A base58 string.
+// - alphabet: Optional custom alphabet to override default base58 alphabet.
 //
 // Returns:
 // - The original numeric string ID, or an error if invalid characters are encountered.
-func UnshortenBase58(s string) (string, error) {
-	return decodeBase(s, alphabet58)
+func UnshortenBase58(s string, alphabet ...string) (string, error) {
+	return decodeBase(s, getAlphabet(alphabet58, alphabet))
 }
 
 // ShortenBase62 converts a numeric string ID to a base62 string.
@@ -246,12 +275,13 @@ func UnshortenBase58(s string) (string, error) {
 // Example: ShortenBase62("1234567890") -> "1LY7vk"
 //
 // Parameters:
-// - id: A numeric string represention of a positive integer.
+// - id: A numeric string representation of a positive integer.
+// - alphabet: Optional custom alphabet to override default base62 alphabet.
 //
 // Returns:
-// - A base62 string (mixed case).
-func ShortenBase62(id string) (string, error) {
-	return encodeBase(id, alphabet62)
+// - A base62 string.
+func ShortenBase62(id string, alphabet ...string) (string, error) {
+	return encodeBase(id, getAlphabet(alphabet62, alphabet))
 }
 
 // UnshortenBase62 converts a base62 string back to its original numeric string ID.
@@ -260,11 +290,12 @@ func ShortenBase62(id string) (string, error) {
 //
 // Parameters:
 // - s: A base62 string.
+// - alphabet: Optional custom alphabet to override default base62 alphabet.
 //
 // Returns:
 // - The original numeric string ID, or an error if invalid characters are encountered.
-func UnshortenBase62(s string) (string, error) {
-	return decodeBase(s, alphabet62)
+func UnshortenBase62(s string, alphabet ...string) (string, error) {
+	return decodeBase(s, getAlphabet(alphabet62, alphabet))
 }
 
 // ShortenZBase32 converts a numeric string ID to a z-base-32 string.
@@ -279,12 +310,13 @@ func UnshortenBase62(s string) (string, error) {
 // Example: ShortenZBase32("1234567890") -> "4pk9xyo"
 //
 // Parameters:
-// - id: A numeric string represention of a positive integer.
+// - id: A numeric string representation of a positive integer.
+// - alphabet: Optional custom alphabet to override default z-base-32 alphabet.
 //
 // Returns:
-// - A lowercase z-base-32 string.
-func ShortenZBase32(id string) (string, error) {
-	return encodeBase(id, alphabetZ32)
+// - A z-base-32 string.
+func ShortenZBase32(id string, alphabet ...string) (string, error) {
+	return encodeBase(id, getAlphabet(alphabetZ32, alphabet))
 }
 
 // UnshortenZBase32 converts a z-base-32 string back to its original numeric string ID.
@@ -292,12 +324,17 @@ func ShortenZBase32(id string) (string, error) {
 // Example: UnshortenZBase32("4pk9xyo") -> "1234567890"
 //
 // Parameters:
-// - s: A z-base-32 string (case-insensitive).
+// - s: A z-base-32 string (case-insensitive when using default alphabet).
+// - alphabet: Optional custom alphabet to override default z-base-32 alphabet.
 //
 // Returns:
 // - The original numeric string ID, or an error if invalid characters are encountered.
-func UnshortenZBase32(s string) (string, error) {
-	return decodeBase(strings.ToLower(s), alphabetZ32)
+func UnshortenZBase32(s string, alphabet ...string) (string, error) {
+	alph := getAlphabet(alphabetZ32, alphabet)
+	if len(alphabet) == 0 || alphabet[0] == "" {
+		s = strings.ToLower(s)
+	}
+	return decodeBase(s, alph)
 }
 
 // encodeBase is an internal helper that converts a numeric string ID to a periodic base string

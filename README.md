@@ -125,6 +125,9 @@ func main() {
     id := "12345678901234567890"
     short, _ := uid.ShortenBase62(id)       // "1n9XvB8P6M"
     original, _ := uid.UnshortenBase62(short) // "12345678901234567890"
+
+    // Custom alphabet override
+    customShort, _ := uid.ShortenBase16(id, "FEDCBA9876543210")
 }
 ```
 
@@ -253,7 +256,7 @@ UUIDs are implemented using only the Go standard library (no external deps).
 
 ## ID Shortening
 
-The package provides functions to shorten numeric string IDs into more compact representations using various base encodings. This is useful for creating URL-friendly or human-readable IDs from large numbers.
+The package provides functions to shorten numeric string IDs into more compact representations using various base encodings. All shortening and unshortening functions accept an optional custom alphabet parameter (e.g. `ShortenBase16(id, alphabet...)`). If omitted, the default alphabet for that base encoding is used.
 
 | Method | Encoding | Alphabet | Case-Sensitive | Human-Facing |
 | :--- | :--- | :--- | :--- | :--- |
@@ -271,6 +274,10 @@ Example:
 id := "12345678901234567890"
 short, _ := uid.ShortenBase62(id)       // "1n9XvB8P6M"
 original, _ := uid.UnshortenBase62(short) // "12345678901234567890"
+
+// Using custom alphabet
+customShort, _ := uid.ShortenBase16(id, "FEDCBA9876543210")
+customOriginal, _ := uid.UnshortenBase16(customShort, "FEDCBA9876543210")
 ```
 
 ### Comparison Table
